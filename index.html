@@ -9,18 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cell-size: 11vmin; --grid-gap: 1.2vmin;
+            --cell-size: 12.5vmin; --grid-gap: 1.5vmin;
             @media (min-width: 768px) { --cell-size: 10vmin; --grid-gap: 1vmin; }
 
             --color-bg-dark: #2c2c34; --color-text: #e0e0ff; --color-accent: #ffcda3;
             --color-polaroid-frame: #f4f4f4;
             --color-pets: #d39c5f; --color-occasions: #5aab9f; --color-relatives: #a37fb1; --color-heartstone: #d17b7b;
-            
-            /* NEW 4-LAYER VISUAL HIERARCHY */
-            --color-grid-frame: #555a66;        /* Lightest */
-            --color-grid-cell-empty: #404552;   /* Light */
-            --color-dementia-light: #1e1e24;   /* Mid */
-            --color-dementia-dark: #000;         /* Darkest */
+            --color-grid-frame: #555a66; --color-grid-cell-empty: #404552;
+            --color-dementia-light: #1e1e24; --color-dementia-dark: #000;
         }
 
         /* --- ANIMATIONS --- */
@@ -37,7 +33,14 @@
         html { font-size: 1.5vmin; @media (min-width: 768px) { font-size: 1.2vmin; } }
         body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
         #body-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; box-sizing: border-box; }
-        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin 0; background-color: rgba(0,0,0,0.2); animation: fadeIn 1s; width: 100%; height: 100%; box-sizing: border-box; justify-content: center; @media (min-width: 768px) { width: auto; height: auto; max-width: 800px; max-height: 900px; padding: 2.5vmin; border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); } }
+        
+        /* MOBILE FIRST: Full screen by default */
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin 0; background-color: var(--color-bg-dark); animation: fadeIn 1s; width: 100%; height: 100%; box-sizing: border-box; justify-content: center; }
+        /* DESKTOP OVERRIDE: Card-like appearance on larger screens */
+        @media (min-width: 700px) and (orientation: landscape), (min-width: 600px) and (min-height: 800px) {
+            #game-container { background-color: rgba(0,0,0,0.2); width: auto; height: auto; max-width: 800px; max-height: 900px; padding: 2.5vmin; border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); }
+        }
+
         #ui-panel { width: 100%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
         #score-display { text-align: center; }
         #level-display { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
@@ -94,7 +97,6 @@
 </head>
 <body>
     <audio id="background-music" loop src="audio/background_music.mp3"></audio>
-
     <div id="body-wrapper">
         <div id="game-container">
             <div id="ui-panel">
