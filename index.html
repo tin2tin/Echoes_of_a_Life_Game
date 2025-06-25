@@ -9,7 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --grid-size: 6; --cell-size: 10vmin; --grid-gap: 1vmin;
+            --grid-size: 6; --cell-size: 11vmin; --grid-gap: 1.2vmin;
+            @media (min-width: 768px) { --cell-size: 10vmin; --grid-gap: 1vmin; }
+
             --color-bg-dark: #2c2c34; --color-text: #e0e0ff; --color-accent: #ffcda3;
             --color-polaroid-frame: #f4f4f4;
             --color-pets: #c78a44; --color-occasions: #5a9a93; --color-relatives: #8c6b99; --color-heartstone: #d17b7b;
@@ -26,36 +28,35 @@
         @keyframes echo-flash { from { opacity: 0.7; } to { opacity: 0; } }
 
         /* --- GENERAL LAYOUT & AESTHETIC --- */
-        html, body { height: 100%; margin: 0; overflow: hidden; }
-        body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); display: flex; justify-content: center; align-items: center; }
-        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; position: relative; width: 100%; max-width: 90vmin; }
-        #ui-panel { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 2.5vmin; font-weight: bold; text-shadow: 0 0 1vmin #000; }
+        html { font-size: 1.5vmin; @media (min-width: 768px) { font-size: 1.2vmin; } }
+        body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; position: relative; width: 100%; max-width: 95vmin; }
+        #ui-panel { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; }
         #score-display span, #level-display span { color: var(--color-accent); font-weight: bold; }
         #level-display.level-up { animation: levelUpFlash 0.5s ease-out; }
 
         /* --- GRID & DEMENTIA STYLES --- */
         #grid-container { display: grid; grid-template-columns: repeat(var(--grid-size), var(--cell-size)); grid-template-rows: repeat(var(--grid-size), var(--cell-size)); gap: var(--grid-gap); background-color: var(--color-grid-frame); padding: var(--grid-gap); border-radius: 1vmin; position: relative; overflow: hidden; }
         .grid-cell { width: var(--cell-size); height: var(--cell-size); background-color: var(--color-grid-cell-empty); box-shadow: inset 0.1vmin 0.1vmin 0.5vmin rgba(0,0,0,0.7); border-radius: 0.5vmin; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.3s ease; }
-        .dementia { background-color: #22222a; background-image: radial-gradient(var(--color-dementia-dark) 30%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
+        .dementia { background-color: #22222a; background-image: radial-gradient(var(--color-dementia) 30%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
         .dementia::after { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at 70% 80%, #5a2c3844, transparent 40%); clip-path: polygon(0 0, 100% 0, 100% 100%, 70% 100%, 30% 60%, 55% 40%, 20% 20%, 0 30%); animation: popIn 0.5s; }
-        .dementia.stubborn { background-color: var(--color-dementia-dark); background-image: none; }
+        .dementia.stubborn { background-color: var(--color-dementia); background-image: none; }
         .dementia.stubborn::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at 30% 20%, #881c2c55, transparent 40%); clip-path: polygon(100% 0, 0 100%, 0 70%, 25% 65%, 45% 30%, 80% 40%, 100% 20%); z-index: 2; animation: popIn 0.6s; }
         .dementia.stubborn::after { background: radial-gradient(circle at 70% 80%, #881c2c88, transparent 50%); z-index: 1; }
         .cleansing { animation: sizzleOut 0.4s ease-out forwards; }
         
         /* --- POLAROID FRAGMENT STYLES --- */
-        .polaroid-frame { width: 95%; height: 95%; background-color: #f4f4f4; border-radius: 0.5vmin; box-shadow: 0.2vmin 0.3vmin 0.5vmin rgba(0,0,0,0.4); padding: 0.8vmin 0.8vmin 2vmin 0.8vmin; display: flex; flex-direction: column; cursor: grab; animation: popIn 0.3s; touch-action: none; /* Important for custom drag */ }
-        .polaroid-photo { flex-grow: 1; display: flex; justify-content: center; align-items: center; font-size: calc(var(--cell-size) * 0.5); filter: grayscale(50%) sepia(30%) brightness(0.9); pointer-events: none; /* Children should not capture events */ }
+        .polaroid-frame { width: 95%; height: 95%; background-color: #f4f4f4; border-radius: 0.5vmin; box-shadow: 0.2vmin 0.3vmin 0.5vmin rgba(0,0,0,0.4); padding: 0.8vmin 0.8vmin 2vmin 0.8vmin; display: flex; flex-direction: column; cursor: grab; animation: popIn 0.3s; position: relative; z-index: 1; }
+        .polaroid-frame.dragging { opacity: 0.5; cursor: grabbing; }
+        .polaroid-photo { flex-grow: 1; display: flex; justify-content: center; align-items: center; font-size: calc(var(--cell-size) * 0.5); filter: grayscale(50%) sepia(30%) brightness(0.9); }
         .choices-wrapper { display: flex; justify-content: center; gap: 2vmin; margin-top: 1vmin; }
-        .choices-wrapper.choices-disabled .polaroid-frame { opacity: 0.5; cursor: wait; }
+        .choices-wrapper.choices-disabled { opacity: 0.5; cursor: wait; }
+        .choices-wrapper.choices-disabled .polaroid-frame { cursor: wait; }
         .choice-container { width: var(--cell-size); height: calc(var(--cell-size) + 1.2vmin); display:flex; justify-content: center; align-items: center; border-radius: 0.5vmin; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ffffff1a 10px, #ffffff1a 20px); }
-
-        /* --- Custom Drag Ghost --- */
-        .ghost { position: fixed; z-index: 1000; pointer-events: none; opacity: 0.7; transform: translate(-50%, -50%); }
-
+        .touch-drag-clone { position: absolute; z-index: 1000; pointer-events: none; opacity: 0.7; }
+        
         /* --- MEMORY ECHO OVERLAYS --- */
-        .echo-overlay, .memory-echo-overlay { position: absolute; pointer-events: none; }
-        .echo-overlay { z-index: 10; animation: echo-flash 0.4s ease-out forwards; border-radius: 0.5vmin; opacity: 0.7; }
+        .echo-overlay { position: absolute; pointer-events: none; z-index: 10; animation: echo-flash 0.4s ease-out forwards; border-radius: 0.5vmin; opacity: 0.7; }
         .echo-overlay.pets { background-color: var(--color-pets); }
         .echo-overlay.occasions { background-color: var(--color-occasions); }
         .echo-overlay.relatives { background-color: var(--color-relatives); }
@@ -64,21 +65,21 @@
         .echo-overlay.directional-column { top: 0; left: 0; width: var(--cell-size); height: 100%; }
         .echo-overlay.area-3x3 { width: calc(3 * var(--cell-size) + 2 * var(--grid-gap)); height: calc(3 * var(--cell-size) + 2 * var(--grid-gap)); }
         .echo-overlay.area-5x5 { width: calc(5 * var(--cell-size) + 4 * var(--grid-gap)); height: calc(5 * var(--cell-size) + 4 * var(--grid-gap)); }
-        .memory-echo-overlay { top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 20; animation: fullMemoryFlash 1s ease-out forwards; }
+        .memory-echo-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 20; pointer-events: none; animation: fullMemoryFlash 1s ease-out forwards; }
         .memory-echo-overlay .polaroid-frame { width: 30vmin; height: 35vmin; padding: 1.5vmin 1.5vmin 4vmin 1.5vmin; cursor: default; }
         .memory-echo-overlay .polaroid-photo { filter: none; font-size: 20vmin; }
         
         /* --- MESSAGE & MENU OVERLAYS --- */
-        #menu-button { position: absolute; top: 0; right: 0; font-size: 4vmin; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 1.5vmin; opacity: 0.7; transition: opacity 0.2s; }
+        #menu-button { position: absolute; top: 1rem; right: 1rem; font-size: 3rem; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }
         #menu-button:hover { opacity: 1; }
         #level-up-notification, .message-overlay { animation: fadeIn 0.5s; }
-        #level-up-notification { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: #000; padding: 1vmin 2vmin; border-radius: 1vmin; font-size: 2.2vmin; font-weight: bold; z-index: 101; pointer-events: none; text-shadow: none; }
-        .message-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(44, 44, 52, 0.9); display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: left; padding: 2vmin; z-index: 100; }
-        .message-content { background: var(--color-bg-dark, #2c2c34); padding: 3vmin 5vmin; border-radius: 1vmin; box-shadow: 0 0 2vmin rgba(0,0,0,0.5); }
-        .message-content h1 { font-size: 4.5vmin; margin-bottom: 2vmin; color: var(--color-accent); text-align: center; font-style: italic; }
-        .message-content p, .message-content li { font-size: 2.2vmin; line-height: 1.5; max-width: 70vmin; }
-        .message-content ul { list-style: none; padding-left: 1.5rem; }
-        .message-content button, .menu-btn { padding: 2vmin 4vmin; font-size: 2.2vmin; background-color: var(--color-accent); color: #000; border: none; border-radius: 0.5vmin; cursor: pointer; margin-top: 2vmin; font-weight: bold; transition: transform 0.2s ease; font-family: 'Lora', serif; font-style: italic; width: 100%; text-align: center; }
+        #level-up-notification { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: #000; padding: 1vmin 2vmin; border-radius: 1vmin; font-size: 1.2rem; font-weight: bold; z-index: 101; pointer-events: none; text-shadow: none; }
+        .message-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(44, 44, 52, 0.9); display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: left; padding: 2vmin; z-index: 100; }
+        .message-content { background: var(--color-bg-dark, #2c2c34); padding: 4vmin 6vmin; border-radius: 1vmin; box-shadow: 0 0 2vmin rgba(0,0,0,0.5); width: 90%; max-width: 500px; }
+        .message-content h1 { font-size: clamp(2.5rem, 6vmin, 3.5rem); margin-bottom: 1rem; color: var(--color-accent); text-align: center; font-style: italic; }
+        .message-content p, .message-content li { font-size: clamp(1.4rem, 3.5vmin, 1.8rem); line-height: 1.5; }
+        .message-content ul { list-style: none; padding-left: 1rem; }
+        .message-content button, .menu-btn { padding: 2vmin 4vmin; font-size: clamp(1.5rem, 4vmin, 2rem); background-color: var(--color-accent); color: #000; border: none; border-radius: 0.5vmin; cursor: pointer; margin-top: 2vmin; font-weight: bold; transition: transform 0.2s ease; font-family: 'Lora', serif; font-style: italic; width: 100%; text-align: center; }
         .message-content button:hover, .menu-btn:hover { transform: scale(1.05); }
         .hidden { display: none !important; }
     </style>
@@ -87,76 +88,110 @@
     <audio id="background-music" loop src="audio/background_music.mp3"></audio>
 
     <div id="game-container">
-        <!-- Menu Button and Overlays are moved outside the main container to ensure they cover the full screen -->
-    </div>
-    
-    <div id="menu-button-container">
         <button id="menu-button" class="hidden">☰</button>
+        <div id="ui-panel">
+            <div id="score-display">Score: <span>0</span></div>
+            <div id="level-display">Level: <span>1</span></div>
+        </div>
+        <div id="grid-container"></div>
+        <div class="choices-wrapper">
+            <div class="choice-container"></div>
+            <div class="choice-container"></div>
+        </div>
+        <div id="level-up-notification" class="hidden"></div>
     </div>
-
-    <div id="start-screen" class="message-overlay"> <!-- ... content ... --> </div>
-    <div id="game-over-screen" class="message-overlay hidden"> <!-- ... content ... --> </div>
-    <div id="menu-overlay" class="message-overlay hidden"> <!-- ... content ... --> </div>
     
-    <!-- Duplicating overlay content for brevity. In a real app, this would be templated. -->
-    <div id="start-screen" class="message-overlay"><div class="message-content"><h1>Echoes of a Life</h1><p>The mind is a projector, full of memories like slides in a tray. But <strong>Dementia</strong>, like a broken slide, threatens to darken the screen.</p><p>Piece together the faded fragments of your past. Restore them to clarity, and let their light push back the encroaching dark. As you delve deeper, you will unlock new memories:</p><ul><li><strong style="color:var(--color-pets)">Level 1 - Pets (🐶🐱🐰):</strong> Clears a single row or column.</li><li><strong style="color:var(--color-occasions)">Level 2 - Occasions (🎂🎄🏖️):</strong> Clears a 3x3 area.</li><li><strong style="color:var(--color-relatives)">Level 3 - Relatives (👨👩👧):</strong> Clears three rows OR three columns.</li><li><strong style="color:var(--color-heartstone)">Level 4+ - The Heartstone (❤️):</strong> A rare, lucid memory that clears a massive 5x5 area.</li></ul><center><button id="start-button">Begin Projecting</button></center></div></div>
-    <div id="game-over-screen" class="message-overlay hidden"><div class="message-content"><h1>The Reel Ends</h1><p id="final-score" style="text-align:center; font-size: 1.5em;"></p><p>The dementia has clouded the lens for now. The projector grows quiet. But the images, the echoes of a life lived, are never truly gone. Rest, and let us remember again.</p><center><button id="restart-button">Rewind the Reel</button></center></div></div>
-    <div id="menu-overlay" class="message-overlay hidden"><div class="message-content"><h1>Paused</h1><button id="return-button" class="menu-btn">Return to Game</button><button id="mute-button" class="menu-btn">Mute Music</button><button id="exit-button" class="menu-btn">Exit Game</button></div></div>
+    <div id="start-screen" class="message-overlay">
+        <div class="message-content">
+            <h1>Echoes of a Life</h1>
+            <p>The mind is a projector, full of memories like slides in a tray. But <strong>Dementia</strong>, like a broken slide, threatens to darken the screen.</p>
+            <p>Piece together the faded fragments of your past. Restore them to clarity, and let their light push back the encroaching dark. As you delve deeper, you will unlock new memories:</p>
+            <ul>
+                <li><strong style="color:var(--color-pets)">Level 1 - Pets (🐶🐱🐰):</strong> Clears a single row or column.</li>
+                <li><strong style="color:var(--color-occasions)">Level 2 - Occasions (🎂🎄🏖️):</strong> Clears a 3x3 area.</li>
+                <li><strong style="color:var(--color-relatives)">Level 3 - Relatives (👨👩👧):</strong> Clears three rows OR three columns.</li>
+                <li><strong style="color:var(--color-heartstone)">Level 4+ - The Heartstone (❤️):</strong> A rare, lucid memory that clears a massive 5x5 area.</li>
+            </ul>
+            <center><button id="start-button">Begin Projecting</button></center>
+        </div>
+    </div>
+    
+    <div id="game-over-screen" class="message-overlay hidden">
+        <div class="message-content">
+            <h1>The Reel Ends</h1>
+            <p id="final-score" style="text-align:center; font-size: 1.5em;"></p>
+            <p>The dementia has clouded the lens for now. The projector grows quiet. But the images, the echoes of a life lived, are never truly gone. Rest, and let us remember again.</p>
+            <center><button id="restart-button">Rewind the Reel</button></center>
+        </div>
+    </div>
+    
+    <div id="menu-overlay" class="message-overlay hidden">
+        <div class="message-content">
+            <h1>Paused</h1>
+            <button id="return-button" class="menu-btn">Return to Game</button>
+            <button id="mute-button" class="menu-btn">Mute Music</button>
+            <button id="exit-button" class="menu-btn">Exit Game</button>
+        </div>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- SYNTHESIZED SOUND ENGINE ---
-        const Sound = (() => { /* ... sound engine code ... */ })();
-        
-        // --- CONFIGURATION ---
-        const MEMORY_DATA = { /* ... config data ... */ };
-        const CONFIG = { /* ... config data ... */ };
+        const Sound = (() => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function play(type) {
+                if (!audioCtx || audioCtx.state === 'suspended') { audioCtx.resume(); }
+                if (!audioCtx) return;
+                try {
+                    const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    if (type === 'place') {
+                        oscillator.type = 'square'; oscillator.frequency.setValueAtTime(80, audioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                        const clickOsc = audioCtx.createOscillator(); const clickGain = audioCtx.createGain();
+                        clickOsc.connect(clickGain); clickGain.connect(audioCtx.destination);
+                        clickOsc.type = 'triangle'; clickOsc.frequency.setValueAtTime(2000, audioCtx.currentTime);
+                        clickGain.gain.setValueAtTime(0.05, audioCtx.currentTime); clickGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                        clickOsc.start(); clickOsc.stop(audioCtx.currentTime + 0.05);
+                    } else if (type === 'match') {
+                        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    }
+                    oscillator.start(); oscillator.stop(audioCtx.currentTime + 1);
+                } catch (e) { console.error("Sound playback failed:", e); }
+            }
+            return { play };
+        })();
 
-        // --- GAME STATE ---
-        let grid, score, level, nextLevelScore, availableMemoryPool, isGameOver, isProcessing, isPaused,
-            gameLoopId = null, lastTimestamp = 0, dementiaSpawnTimer = 0, cellAndGapSize = 0,
-            draggedItem = null, draggedElement = null, ghostElement = null; // For custom drag
-        
-        // --- DOM REFERENCES ---
-        const gameContainer = document.getElementById('game-container'), bgMusic = document.getElementById('background-music'),
-              choicesWrapper = document.querySelector('.choices-wrapper'), startScreen = document.getElementById('start-screen'), 
-              gameOverScreen = document.getElementById('game-over-screen'), menuButton = document.getElementById('menu-button'), 
-              menuOverlay = document.getElementById('menu-overlay'), returnButton = document.getElementById('return-button'),
-              muteButton = document.getElementById('mute-button'), exitButton = document.getElementById('exit-button'),
-              startButton = document.getElementById('start-button'), restartButton = document.getElementById('restart-button');
-        
-        const M_DATA = {
+        // --- CONFIGURATION ---
+        const MEMORY_DATA = {
             pets: { group: 'pets', color: 'var(--color-pets)', clear: 'directional', minLevel: 1, fragments: [{ symbol: '🐶' }, { symbol: '🐱' }, { symbol: '🐰' }] },
             occasions: { group: 'occasions', color: 'var(--color-occasions)', clear: 'area_3x3', minLevel: 2, fragments: [{ symbol: '🎂' }, { symbol: '🎄' }, { symbol: '🏖️' }] },
             relatives: { group: 'relatives', color: 'var(--color-relatives)', clear: 'cross_clear', minLevel: 3, fragments: [{ symbol: '👨' }, { symbol: '👩' }, { symbol: '👧' }] }
         };
-        const G_CONFIG = {
+        const CONFIG = {
             GRID_SIZE: 6, BASE_SPAWN_INTERVAL: 4000, LEVEL_SCORE_THRESHOLD: 1000, HEARTSTONE_CHANCE: 0.05,
             POINTS: { MATCH: 100, CLEAR_DEMENTIA: 20, CLEAR_STUBBORN: 30, HEARTSTONE_USE: 250 }
         };
 
-        // Re-create game board inside container
-        gameContainer.innerHTML = `
-            <div id="ui-panel">
-                <div id="score-display">Score: <span>0</span></div>
-                <div id="level-display">Level: <span>1</span></div>
-            </div>
-            <div id="grid-container"></div>
-            <div class="choices-wrapper">
-                <div class="choice-container"></div>
-                <div class="choice-container"></div>
-            </div>
-            <div id="level-up-notification" class="hidden"></div>
-        `;
-        const gridContainer = document.getElementById('grid-container'),
-              choiceContainers = document.querySelectorAll('.choice-container'),
-              levelUpNotification = document.getElementById('level-up-notification');
+        // --- GAME STATE ---
+        let grid, score, level, nextLevelScore, availableMemoryPool, isGameOver, isProcessing, draggedItem, isPaused,
+            gameLoopId = null, lastTimestamp = 0, dementiaSpawnTimer = 0, cellAndGapSize = 0, touchDragClone = null;
+        
+        // --- DOM REFERENCES ---
+        const bgMusic = document.getElementById('background-music'),
+              gridContainer = document.getElementById('grid-container'), scoreDisplay = document.querySelector('#score-display span'), levelDisplay = document.getElementById('level-display'),
+              choicesWrapper = document.querySelector('.choices-wrapper'), choiceContainers = document.querySelectorAll('.choice-container'),
+              levelUpNotification = document.getElementById('level-up-notification'), startScreen = document.getElementById('start-screen'), gameOverScreen = document.getElementById('game-over-screen'),
+              menuButton = document.getElementById('menu-button'), menuOverlay = document.getElementById('menu-overlay'),
+              returnButton = document.getElementById('return-button'), muteButton = document.getElementById('mute-button'), exitButton = document.getElementById('exit-button'),
+              startButton = document.getElementById('start-button'), restartButton = document.getElementById('restart-button');
 
         // --- MAIN GAME LOOP (Frame-rate independent) ---
         function gameLoop(timestamp) {
             if (isGameOver) return;
             if (isPaused) {
-                lastTimestamp = 0; // Prevent deltaTime jump after unpausing
+                lastTimestamp = 0; // Prevent deltaTime from accumulating while paused
                 gameLoopId = requestAnimationFrame(gameLoop);
                 return;
             }
@@ -165,7 +200,7 @@
             lastTimestamp = timestamp;
             dementiaSpawnTimer -= deltaTime;
             if (dementiaSpawnTimer <= 0) {
-                const spawnRate = Math.max(G_CONFIG.BASE_SPAWN_INTERVAL - (level * 400), 1000);
+                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 400), 1000);
                 dementiaSpawnTimer = spawnRate;
                 spawnDementia((level >= 4 && Math.random() < 0.25) ? 2 : 1);
             }
@@ -175,16 +210,16 @@
         // --- CORE GAME LOGIC ---
         function init() {
             if (gameLoopId) cancelAnimationFrame(gameLoopId);
-            score = 0; level = 1; nextLevelScore = G_CONFIG.LEVEL_SCORE_THRESHOLD;
+            score = 0; level = 1; nextLevelScore = CONFIG.LEVEL_SCORE_THRESHOLD;
             isGameOver = false; isProcessing = false; draggedItem = null; availableMemoryPool = []; isPaused = false;
-            lastTimestamp = 0; dementiaSpawnTimer = G_CONFIG.BASE_SPAWN_INTERVAL;
+            lastTimestamp = 0; dementiaSpawnTimer = CONFIG.BASE_SPAWN_INTERVAL;
             updateScore(0); updateLevelDisplay();
             bgMusic.pause(); bgMusic.currentTime = 0;
             gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); menuOverlay.classList.add('hidden'); menuButton.classList.add('hidden');
             gridContainer.innerHTML = '';
-            grid = Array(G_CONFIG.GRID_SIZE).fill(null).map(() => Array(G_CONFIG.GRID_SIZE).fill(null));
-            for (let r = 0; r < G_CONFIG.GRID_SIZE; r++) {
-                for (let c = 0; c < G_CONFIG.GRID_SIZE; c++) {
+            grid = Array(CONFIG.GRID_SIZE).fill(null).map(() => Array(CONFIG.GRID_SIZE).fill(null));
+            for (let r = 0; r < CONFIG.GRID_SIZE; r++) {
+                for (let c = 0; c < CONFIG.GRID_SIZE; c++) {
                     const cell = document.createElement('div');
                     cell.className = 'grid-cell'; cell.dataset.r = r; cell.dataset.c = c;
                     gridContainer.appendChild(cell);
@@ -198,16 +233,163 @@
             startScreen.classList.add('hidden');
             menuButton.classList.remove('hidden');
             if (Sound) Sound.play('match');
-            bgMusic.play().catch(e => {});
+            bgMusic.play().catch(e => console.error("Audio play failed:", e));
             updateAvailableMemoryPool(); spawnDementia(3);
             generateChoices();
             gameLoopId = requestAnimationFrame(gameLoop);
         }
-
-        // --- All other functions ---
-        async function processTurn(){isProcessing=!0,choicesWrapper.classList.add("choices-disabled"),await findAndProcessMatches(),setTimeout(()=>{generateChoices(),isProcessing=!1,choicesWrapper.classList.remove("choices-disabled"),checkGameOver()},500)}function calculateDynamicSizes(){const e=getCellElement(0,0);if(!e)return;const t=window.getComputedStyle(e),o=parseFloat(t.width),l=window.getComputedStyle(gridContainer),n=parseFloat(l.gap);cellAndGapSize=o+n}function levelUp(){level++,nextLevelScore+=G_CONFIG.LEVEL_SCORE_THRESHOLD*level,updateLevelDisplay(!0);const e=updateAvailableMemoryPool();e&&showLevelUpNotification(e.group)}function updateAvailableMemoryPool(){const e=availableMemoryPool.length;return availableMemoryPool=Object.values(M_DATA).filter(e=>level>=e.minLevel),availableMemoryPool.length>e?availableMemoryPool[availableMemoryPool.length-1]:null}function spawnDementia(e=1){if(!isGameOver)for(let t=0;t<e;t++){const e=[];for(let t=0;t<G_CONFIG.GRID_SIZE;t++)for(let o=0;o<G_CONFIG.GRID_SIZE;o++)null===grid[t][o]&&e.push({r:t,c:o});if(e.length>0){const{r:t,c:o}=e[Math.floor(Math.random()*e.length)],l=level>=2&&Math.random()<level*.1;grid[t][o]={type:"dementia",stubborn:l},getCellElement(t,o).classList.add("dementia"),l&&getCellElement(t,o).classList.add("stubborn")}else break}checkGameOver()}function createFragmentElement(e){const t=document.createElement("div");t.className="polaroid-frame";const o=document.createElement("div");return o.className="polaroid-photo",o.textContent=e.symbol,o.style.backgroundColor=e.color,t.appendChild(o),"heartstone"===e.type&&(o.style.filter="none"),addDragListeners(t,e),t}function addDragListeners(e,t){e.addEventListener("mousedown",o=>startDrag(o,t,e)),e.addEventListener("touchstart",o=>startDrag(o,t,e),{passive:!1})}function startDrag(e,t,o){if(isProcessing||isPaused)return;e.preventDefault(),draggedItem=t,draggedElement=o,draggedElement.style.opacity="0.5",ghostElement=draggedElement.cloneNode(!0),ghostElement.classList.add("ghost"),document.body.appendChild(ghostElement),moveDrag(e),document.addEventListener("mousemove",moveDrag),document.addEventListener("touchmove",moveDrag,{passive:!1}),document.addEventListener("mouseup",endDrag),document.addEventListener("touchend",endDrag)}function moveDrag(e){if(!ghostElement)return;const t="touchmove"===e.type?e.touches[0]:e;ghostElement.style.left=`${t.clientX}px`,ghostElement.style.top=`${t.clientY}px`}function endDrag(e){if(!draggedItem)return;const t="touchend"===e.type?e.changedTouches[0]:e,o=document.elementFromPoint(t.clientX,t.clientY)?.closest(".grid-cell");o&&placeItemOnCell(o),draggedElement.style.opacity="1",ghostElement&&ghostElement.remove(),ghostElement=null,draggedItem=null,draggedElement=null,document.removeEventListener("mousemove",moveDrag),document.removeEventListener("touchmove",moveDrag),document.removeEventListener("mouseup",endDrag),document.removeEventListener("touchend",endDrag)}function placeItemOnCell(e){const t=parseInt(e.dataset.r),o=parseInt(e.dataset.l),l=draggedItem.sourceContainer;if("heartstone"===draggedItem.type)l.innerHTML="",activateHeartstone(t,o);else if(null===grid[t][o])l.innerHTML="",placeFragment(t,o,draggedItem.fragment,draggedItem.groupInfo)}function placeFragment(e,t,o,l){Sound.play("place"),grid[e][t]={type:"fragment",group:l.group,...o};const n=createFragmentElement({symbol:o.symbol,color:l.color,type:"fragment",fragment:o,groupInfo:l});n.draggable=!1,getCellElement(e,t).appendChild(n),processTurn()}function findAndProcessMatches(){return new Promise(e=>{const t=new Set,o=[];const l=(e,t,o)=>null!=e&&"fragment"===e.type&&e.group===t?.group&&e.group===o?.group;for(let n=0;n<G_CONFIG.GRID_SIZE;n++)for(let r=0;r<G_CONFIG.GRID_SIZE-2;r++)l(grid[n][r],grid[n][r+1],grid[n][r+2])&&(o.push({groupInfo:M_DATA[grid[n][r].group],cells:[[n,r],[n,r+1],[n,r+2]],orientation:"horizontal"}),t.add(`${n},${r}`),t.add(`${n},${r+1}`),t.add(`${n},${r+2}`));for(let n=0;n<G_CONFIG.GRID_SIZE;n++)for(let r=0;r<G_CONFIG.GRID_SIZE-2;r++)l(grid[r][n],grid[r+1][n],grid[r+2][n])&&(o.push({groupInfo:M_DATA[grid[r][n].group],cells:[[r,n],[r+1,n],[r+2,n]],orientation:"vertical"}),t.add(`${r},${n}`),t.add(`${r+1},${n}`),t.add(`${r+2},${n}`));if(0===o.length)return e(!1);updateScore(o.length*G_CONFIG.POINTS.MATCH),o.forEach(e=>{e.cells.forEach(([e,t])=>{getCellElement(e,t)?.firstChild?.classList.add("matched")}),applyEchoEffect(e.groupInfo,e.cells,e.orientation)}),setTimeout(()=>{t.forEach(t=>clearCell(...t.split(",").map(Number),!1)),e(!0)},500)})}function applyEchoEffect(e,t,o){Sound.play("match");const l=document.createElement("div");l.className="memory-echo-overlay";const n=document.createElement("div");n.className="polaroid-frame";const r=document.createElement("div");r.className="polaroid-photo",r.textContent=grid[t[1][0]][t[1][1]].symbol,r.style.backgroundColor=e.color,n.appendChild(r),l.appendChild(n),document.body.appendChild(l),setTimeout(()=>l.remove(),1e3);const a=t[1],i=a[0],s=a[1],d=document.createElement("div");if(d.className=`echo-overlay ${e.group}`,"directional"===e.clear){d.classList.add(`directional-${"horizontal"===o?"row":"column"}`),"horizontal"===o?(d.style.top=`${i*cellAndGapSize}px`,(()=>{for(let e=0;e<G_CONFIG.GRID_SIZE;e++)cleanseDementiaData(i,e)})()):(d.style.left=`${s*cellAndGapSize}px`,(()=>{for(let e=0;e<G_CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s)})()),gridContainer.appendChild(d),setTimeout(()=>d.remove(),400)}else if("area_3x3"===e.clear){d.classList.add("area-3x3"),d.style.top=`${(i-1)*cellAndGapSize}px`,d.style.left=`${(s-1)*cellAndGapSize}px`,gridContainer.appendChild(d),setTimeout(()=>d.remove(),400);for(let e=i-1;e<=i+1;e++)for(let t=s-1;t<=s+1;t++)cleanseDementiaData(e,t)}else if("cross_clear"===e.clear){const t="horizontal"===o;for(let l=-1;l<=1;l++){const n=document.createElement("div");if(n.className=`echo-overlay ${e.group} directional-${t?"column":"row"}`,t){n.style.left=`${(s+l)*cellAndGapSize}px`;for(let e=0;e<G_CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s+l)}else{n.style.top=`${(i+l)*cellAndGapSize}px`;for(let e=0;e<G_CONFIG.GRID_SIZE;e++)cleanseDementiaData(i+l,e)}gridContainer.appendChild(n),setTimeout(()=>n.remove(),400)}}}function activateHeartstone(e,t){Sound.play("match"),updateScore(G_CONFIG.POINTS.HEARTSTONE_USE);const o=document.createElement("div");o.className="echo-overlay heartstone area-5x5";const l=Math.min(Math.max(0,e-2),G_CONFIG.GRID_SIZE-5),n=Math.min(Math.max(0,t-2),G_CONFIG.GRID_SIZE-5);o.style.top=`${l*cellAndGapSize}px`,o.style.left=`${n*cellAndGapSize}px`,gridContainer.appendChild(o),setTimeout(()=>o.remove(),400);for(let e=l;e<l+5;e++)for(let t=n;t<n+5;t++)e>=0&&e<G_CONFIG.GRID_SIZE&&t>=0&&t<G_CONFIG.GRID_SIZE&&clearCell(e,t,!0);processTurn()}function clearCell(e,t,o){const l=getCellElement(e,t),n=grid[e][t];l&&n&&(o&&"dementia"===n.type&&updateScore(n.stubborn?G_CONFIG.POINTS.CLEAR_STUBBORN+G_CONFIG.POINTS.CLEAR_DEMENTIA:G_CONFIG.POINTS.CLEAR_DEMENTIA),l.innerHTML="",l.classList.remove("dementia","stubborn"),grid[e][t]=null)}function cleanseDementiaData(e,t){if(!(e<0||e>=G_CONFIG.GRID_SIZE||t<0||t>=G_CONFIG.GRID_SIZE)){const o=grid[e][t];if(o?.type==="dementia"){const l=getCellElement(e,t);l.classList.add("cleansing"),setTimeout(()=>{const n=grid[e][t];n&&"dementia"===n.type?n.stubborn?(n.stubborn=!1,l.classList.remove("stubborn","cleansing"),updateScore(G_CONFIG.POINTS.CLEAR_STUBBORN)):(grid[e][t]=null,l.classList.remove("dementia","cleansing"),updateScore(G_CONFIG.POINTS.CLEAR_DEMENTIA)):l.classList.remove("dementia","stubborn","cleansing")},400)}}}function generateChoices(){choiceContainers.forEach(e=>{if(e.hasChildNodes())return;if(level>=4&&Math.random()<G_CONFIG.HEARTSTONE_CHANCE)return void e.appendChild(createFragmentElement({symbol:"❤️",color:"var(--color-heartstone)",type:"heartstone"}));const t=[];availableMemoryPool.forEach(e=>{const o="relatives"===e.group?1:"occasions"===e.group?2:4;for(let l=0;l<o;l++)t.push(e)});const o=t[Math.floor(Math.random()*t.length)],l=o.fragments[Math.floor(Math.random()*o.fragments.length)];e.appendChild(createFragmentElement({symbol:l.symbol,color:o.color,type:"fragment",fragment:l,groupInfo:o}))})}function getCellElement(e,t){return gridContainer.querySelector(`[data-r='${e}'][data-c='${t}']`)}function updateScore(e){isGameOver||(score+=e,document.querySelector("#score-display span").textContent=score,score>=nextLevelScore&&levelUp())}function updateLevelDisplay(e=!1){document.querySelector("#level-display span").textContent=level,e&&(document.getElementById("level-display").classList.add("level-up"),setTimeout(()=>document.getElementById("level-display").classList.remove("level-up"),500))}function showLevelUpNotification(e){levelUpNotification.textContent=`You remember your ${e}...`,levelUpNotification.classList.remove("hidden"),levelUpNotification.style.animation="fadeIn 0.5s ease-out forwards",setTimeout(()=>{levelUpNotification.style.animation="fadeOut 0.5s ease-in forwards",setTimeout(()=>levelUpNotification.classList.add("hidden"),500)},2500)}function checkGameOver(){if(!isGameOver){for(let e=0;e<G_CONFIG.GRID_SIZE;e++)for(let t=0;t<G_CONFIG.GRID_SIZE;t++)if(null===grid[e][t])return;isGameOver=!0,gameLoopId&&cancelAnimationFrame(gameLoopId),bgMusic.pause(),document.getElementById("final-score").textContent=`Final Score: ${score} | Reached Level: ${level}`,gameOverScreen.classList.remove("hidden"),menuButton.classList.add("hidden")}}
         
-        function openMenu(){isPaused=!0,menuOverlay.classList.remove("hidden"),bgMusic.muted||bgMusic.pause(),choicesWrapper.classList.add("choices-disabled")}function closeMenu(){isPaused=!1,menuOverlay.classList.add("hidden"),bgMusic.muted||bgMusic.play().catch(e=>{}),choicesWrapper.classList.remove("choices-disabled"),lastTimestamp=performance.now()}function toggleMute(){bgMusic.muted=!bgMusic.muted,muteButton.textContent=bgMusic.muted?"Unmute Music":"Mute Music"}menuButton.addEventListener("click",openMenu),returnButton.addEventListener("click",closeMenu),exitButton.addEventListener("click",()=>{closeMenu(),init()}),muteButton.addEventListener("click",toggleMute),startButton.addEventListener("click",startGame),restartButton.addEventListener("click",()=>{init(),startGame()}),window.addEventListener("resize",calculateDynamicSizes),init();
+        async function processTurn() {
+            isProcessing = true; choicesWrapper.classList.add('choices-disabled');
+            await findAndProcessMatches();
+            setTimeout(() => {
+                generateChoices(); isProcessing = false; choicesWrapper.classList.remove('choices-disabled');
+                checkGameOver();
+            }, 500);
+        }
+
+        function calculateDynamicSizes() {
+            const cellEl = getCellElement(0, 0); if (!cellEl) return;
+            const style = window.getComputedStyle(cellEl);
+            const cellWidth = parseFloat(style.width);
+            const gridStyle = window.getComputedStyle(gridContainer);
+            const gap = parseFloat(gridStyle.gap);
+            cellAndGapSize = cellWidth + gap;
+        }
+        
+        // --- LEVELING & DIFFICULTY ---
+        function levelUp(){level++;nextLevelScore+=CONFIG.LEVEL_SCORE_THRESHOLD*level;updateLevelDisplay(!0);const e=updateAvailableMemoryPool();e&&showLevelUpNotification(e.group)}function updateAvailableMemoryPool(){const e=availableMemoryPool.length;return availableMemoryPool=Object.values(MEMORY_DATA).filter(e=>level>=e.minLevel),availableMemoryPool.length>e?availableMemoryPool[availableMemoryPool.length-1]:null}function spawnDementia(e=1){if(!isGameOver)for(let t=0;t<e;t++){const e=[];for(let t=0;t<CONFIG.GRID_SIZE;t++)for(let o=0;o<CONFIG.GRID_SIZE;o++)null===grid[t][o]&&e.push({r:t,c:o});if(e.length>0){const{r:t,c:o}=e[Math.floor(Math.random()*e.length)],l=level>=2&&Math.random()<level*.1;grid[t][o]={type:"dementia",stubborn:l},getCellElement(t,o).classList.add("dementia"),l&&getCellElement(t,o).classList.add("stubborn")}else break}checkGameOver()}
+        
+        // --- DRAG & TOUCH INPUT LOGIC ---
+        function addInputListenersToElement(el, data) {
+            // Mouse Drag & Drop
+            el.draggable = true;
+            el.addEventListener('dragstart', (e) => {
+                if (isProcessing || isPaused) { e.preventDefault(); return; }
+                draggedItem = { ...data, sourceContainer: el.parentElement };
+                el.classList.add('dragging'); setTimeout(() => el.style.visibility = 'hidden', 0);
+            });
+            el.addEventListener('dragend', () => { draggedItem = null; el.classList.remove('dragging'); el.style.visibility = 'visible'; });
+
+            // Touch Drag & Drop
+            el.addEventListener('touchstart', (e) => {
+                if (isProcessing || isPaused) return;
+                e.preventDefault();
+                draggedItem = { ...data, sourceContainer: el.parentElement };
+                touchDragClone = el.cloneNode(true);
+                touchDragClone.classList.add('touch-drag-clone');
+                document.body.appendChild(touchDragClone);
+                const touch = e.touches[0];
+                touchDragClone.style.left = `${touch.clientX - touchDragClone.offsetWidth / 2}px`;
+                touchDragClone.style.top = `${touch.clientY - touchDragClone.offsetHeight / 2}px`;
+                el.style.opacity = '0.5';
+            }, { passive: false });
+        }
+
+        function addGlobalTouchListeners() {
+            document.body.addEventListener('touchmove', (e) => {
+                if (!touchDragClone) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                touchDragClone.style.left = `${touch.clientX - touchDragClone.offsetWidth / 2}px`;
+                touchDragClone.style.top = `${touch.clientY - touchDragClone.offsetHeight / 2}px`;
+            }, { passive: false });
+
+            document.body.addEventListener('touchend', (e) => {
+                if (!touchDragClone) return;
+                const touch = e.changedTouches[0];
+                const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+                const cell = dropTarget?.closest('.grid-cell');
+                handleDrop(cell);
+                touchDragClone.remove();
+                touchDragClone = null;
+                draggedItem.sourceContainer.querySelector('.polaroid-frame').style.opacity = '1';
+                draggedItem = null;
+            });
+        }
+        
+        function addGridDropListeners() {
+            gridContainer.addEventListener('dragover', (e) => e.preventDefault());
+            gridContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (isProcessing || !draggedItem) return;
+                const cell = e.target.closest('.grid-cell');
+                handleDrop(cell);
+            });
+        }
+
+        function handleDrop(cell) {
+            if (!cell || isProcessing || !draggedItem) return;
+            const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+            const sourceContainer = draggedItem.sourceContainer;
+
+            if (draggedItem.type === 'heartstone') {
+                sourceContainer.innerHTML = ''; activateHeartstone(r, c);
+            } else if (grid[r][c] === null) {
+                sourceContainer.innerHTML = ''; placeFragment(r, c, draggedItem.fragment, draggedItem.groupInfo);
+            }
+        }
+
+        function createFragmentElement(data) {
+            const frame = document.createElement('div'); frame.className = 'polaroid-frame';
+            const photo = document.createElement('div'); photo.className = 'polaroid-photo';
+            photo.textContent = data.symbol; photo.style.backgroundColor = data.color;
+            frame.appendChild(photo);
+            if(data.type === 'heartstone') photo.style.filter = 'none';
+            addInputListenersToElement(frame, data);
+            return frame;
+        }
+
+        function placeFragment(r, c, fragment, groupInfo) {
+            Sound.play('place');
+            grid[r][c] = { type: 'fragment', group: groupInfo.group, ...fragment };
+            const el = createFragmentElement({ symbol: fragment.symbol, color: groupInfo.color, type: 'fragment', fragment, groupInfo });
+            el.draggable = false;
+            getCellElement(r, c).appendChild(el);
+            processTurn();
+        }
+
+        // --- MATCH & EFFECT LOGIC ---
+        function findAndProcessMatches(){return new Promise(e=>{const t=new Set,o=[];const l=(e,t,o)=>null!=e&&"fragment"===e.type&&e.group===t?.group&&e.group===o?.group;for(let n=0;n<CONFIG.GRID_SIZE;n++)for(let r=0;r<CONFIG.GRID_SIZE-2;r++)l(grid[n][r],grid[n][r+1],grid[n][r+2])&&(o.push({groupInfo:MEMORY_DATA[grid[n][r].group],cells:[[n,r],[n,r+1],[n,r+2]],orientation:"horizontal"}),t.add(`${n},${r}`),t.add(`${n},${r+1}`),t.add(`${n},${r+2}`));for(let n=0;n<CONFIG.GRID_SIZE;n++)for(let r=0;r<CONFIG.GRID_SIZE-2;r++)l(grid[r][n],grid[r+1][n],grid[r+2][n])&&(o.push({groupInfo:MEMORY_DATA[grid[r][n].group],cells:[[r,n],[r+1,n],[r+2,n]],orientation:"vertical"}),t.add(`${r},${n}`),t.add(`${r+1},${n}`),t.add(`${r+2},${n}`));if(0===o.length)return e(!1);updateScore(o.length*CONFIG.POINTS.MATCH),o.forEach(e=>{e.cells.forEach(([e,t])=>{getCellElement(e,t)?.firstChild?.classList.add("matched")}),applyEchoEffect(e.groupInfo,e.cells,e.orientation)}),setTimeout(()=>{t.forEach(t=>clearCell(...t.split(",").map(Number),!1)),e(!0)},500)})}
+        function applyEchoEffect(e,t,o){Sound.play("match");const l=document.createElement("div");l.className="memory-echo-overlay";const n=document.createElement("div");n.className="polaroid-frame";const r=document.createElement("div");r.className="polaroid-photo",r.textContent=grid[t[1][0]][t[1][1]].symbol,r.style.backgroundColor=e.color,n.appendChild(r),l.appendChild(n),gridContainer.appendChild(l),setTimeout(()=>l.remove(),1e3);const a=t[1],i=a[0],s=a[1],d=document.createElement("div");if(d.className=`echo-overlay ${e.group}`,"directional"===e.clear){d.classList.add(`directional-${"horizontal"===o?"row":"column"}`),"horizontal"===o?(d.style.top=`${i*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i,e)})()):(d.style.left=`${s*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s)})()),gridContainer.appendChild(d),setTimeout(()=>d.remove(),400)}else if("area_3x3"===e.clear){d.classList.add("area-3x3"),d.style.top=`${(i-1)*cellAndGapSize}px`,d.style.left=`${(s-1)*cellAndGapSize}px`,gridContainer.appendChild(d),setTimeout(()=>d.remove(),400);for(let e=i-1;e<=i+1;e++)for(let t=s-1;t<=s+1;t++)cleanseDementiaData(e,t)}else if("cross_clear"===e.clear){const t="horizontal"===o;for(let l=-1;l<=1;l++){const n=document.createElement("div");if(n.className=`echo-overlay ${e.group} directional-${t?"column":"row"}`,t){n.style.left=`${(s+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s+l)}else{n.style.top=`${(i+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i+l,e)}gridContainer.appendChild(n),setTimeout(()=>n.remove(),400)}}}
+        function activateHeartstone(e,t){Sound.play("match"),updateScore(CONFIG.POINTS.HEARTSTONE_USE);const o=document.createElement("div");o.className="echo-overlay heartstone area-5x5";const l=Math.min(Math.max(0,e-2),CONFIG.GRID_SIZE-5),n=Math.min(Math.max(0,t-2),CONFIG.GRID_SIZE-5);o.style.top=`${l*cellAndGapSize}px`,o.style.left=`${n*cellAndGapSize}px`,gridContainer.appendChild(o),setTimeout(()=>o.remove(),400);for(let e=l;e<l+5;e++)for(let t=n;t<n+5;t++)e>=0&&e<CONFIG.GRID_SIZE&&t>=0&&t<CONFIG.GRID_SIZE&&clearCell(e,t,!0);processTurn()}
+
+        // --- UI & UTILITY FUNCTIONS ---
+        function clearCell(e,t,o){const l=getCellElement(e,t),n=grid[e][t];l&&n&&(o&&"dementia"===n.type&&updateScore(n.stubborn?CONFIG.POINTS.CLEAR_STUBBORN+CONFIG.POINTS.CLEAR_DEMENTIA:CONFIG.POINTS.CLEAR_DEMENTIA),l.innerHTML="",l.classList.remove("dementia","stubborn"),grid[e][t]=null)}
+        function cleanseDementiaData(e,t){if(!(e<0||e>=CONFIG.GRID_SIZE||t<0||t>=CONFIG.GRID_SIZE)){const o=grid[e][t];if(o?.type==="dementia"){const l=getCellElement(e,t);l.classList.add("cleansing"),setTimeout(()=>{const n=grid[e][t];n&&"dementia"===n.type?n.stubborn?(n.stubborn=!1,l.classList.remove("stubborn","cleansing"),updateScore(CONFIG.POINTS.CLEAR_STUBBORN)):(grid[e][t]=null,l.classList.remove("dementia","cleansing"),updateScore(CONFIG.POINTS.CLEAR_DEMENTIA)):l.classList.remove("dementia","stubborn","cleansing")},400)}}}
+        function generateChoices(){choiceContainers.forEach(e=>{if(e.hasChildNodes())return;if(level>=4&&Math.random()<CONFIG.HEARTSTONE_CHANCE)return void e.appendChild(createFragmentElement({symbol:"❤️",color:"var(--color-heartstone)",type:"heartstone"}));const t=[];availableMemoryPool.forEach(e=>{const o="relatives"===e.group?1:"occasions"===e.group?2:4;for(let l=0;l<o;l++)t.push(e)});const o=t[Math.floor(Math.random()*t.length)],l=o.fragments[Math.floor(Math.random()*o.fragments.length)];e.appendChild(createFragmentElement({symbol:l.symbol,color:o.color,type:"fragment",fragment:l,groupInfo:o}))})}
+        function getCellElement(e,t){return gridContainer.querySelector(`[data-r='${e}'][data-c='${t}']`)}function updateScore(e){isGameOver||(score+=e,scoreDisplay.textContent=score,score>=nextLevelScore&&levelUp())}function updateLevelDisplay(e=!1){levelDisplay.querySelector("span").textContent=level,e&&(levelDisplay.classList.add("level-up"),setTimeout(()=>levelDisplay.classList.remove("level-up"),500))}
+        function showLevelUpNotification(e){levelUpNotification.textContent=`You remember your ${e}...`,levelUpNotification.classList.remove("hidden"),levelUpNotification.style.animation="fadeIn 0.5s ease-out forwards",setTimeout(()=>{levelUpNotification.style.animation="fadeOut 0.5s ease-in forwards",setTimeout(()=>levelUpNotification.classList.add("hidden"),500)},2500)}
+        function checkGameOver(){if(!isGameOver){for(let e=0;e<CONFIG.GRID_SIZE;e++)for(let t=0;t<CONFIG.GRID_SIZE;t++)if(null===grid[e][t])return;isGameOver=!0,gameLoopId&&cancelAnimationFrame(gameLoopId),bgMusic.pause(),document.getElementById("final-score").textContent=`Final Score: ${score} | Reached Level: ${level}`,gameOverScreen.classList.remove("hidden"),menuButton.classList.add("hidden")}}
+        
+        // --- MENU LOGIC ---
+        function openMenu() {
+            if(isGameOver) return;
+            isPaused = true; menuOverlay.classList.remove('hidden');
+            if (!bgMusic.muted) bgMusic.pause();
+            choicesWrapper.classList.add('choices-disabled');
+        }
+        function closeMenu() {
+            isPaused = false; menuOverlay.classList.add('hidden');
+            if (!bgMusic.muted) bgMusic.play().catch(e => {});
+            choicesWrapper.classList.remove('choices-disabled');
+        }
+        function toggleMute() {
+            bgMusic.muted = !bgMusic.muted;
+            muteButton.textContent = bgMusic.muted ? 'Unmute Music' : 'Mute Music';
+        }
+
+        // --- GLOBAL EVENT LISTENERS ---
+        menuButton.addEventListener('click', openMenu);
+        returnButton.addEventListener('click', closeMenu);
+        exitButton.addEventListener('click', () => { isPaused = false; init(); });
+        muteButton.addEventListener('click', toggleMute);
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', () => { init(); startGame(); });
+        window.addEventListener('resize', calculateDynamicSizes);
+        addGlobalTouchListeners();
+        addGridDropListeners();
+        init();
     });
     </script>
 </body>
