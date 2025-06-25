@@ -30,8 +30,13 @@
         /* --- GENERAL LAYOUT & AESTHETIC --- */
         html { font-size: 1.5vmin; @media (min-width: 768px) { font-size: 1.2vmin; } }
         body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
-        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; width: 100%; height: 100%; max-width: 95vmin; max-height: 100vh; box-sizing: border-box; justify-content: center; }
-        #ui-panel { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; width: 100%; max-width: 95vmin; max-height: 100vh; box-sizing: border-box; justify-content: center; }
+        
+        /* --- UI PANEL (RE-STYLED FOR NEW LAYOUT) --- */
+        #ui-panel { width: 100%; display: flex; justify-content: center; /* Center the score */ align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
+        #score-display { text-align: center; }
+        #level-display { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
+        #menu-button { position: absolute; top: 50%; right: 0; transform: translateY(-50%); }
         #score-display span, #level-display span { color: var(--color-accent); font-weight: bold; }
         #level-display.level-up { animation: levelUpFlash 0.5s ease-out; }
 
@@ -70,7 +75,7 @@
         .memory-echo-overlay .polaroid-photo { filter: none; font-size: 20vmin; }
         
         /* --- MESSAGE & MENU OVERLAYS --- */
-        #menu-button { position: absolute; top: 50%; right: 0; transform: translateY(-50%); font-size: 3rem; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }
+        #menu-button { font-size: 3rem; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }
         #menu-button:hover { opacity: 1; }
         #level-up-notification, .message-overlay { animation: fadeIn 0.5s; }
         #level-up-notification { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: #000; padding: 1vmin 2vmin; border-radius: 1vmin; font-size: 1.2rem; font-weight: bold; z-index: 101; pointer-events: none; text-shadow: none; }
@@ -89,8 +94,8 @@
 
     <div id="game-container">
         <div id="ui-panel">
-            <div id="score-display">Score: <span>0</span></div>
             <div id="level-display">Level: <span>1</span></div>
+            <div id="score-display">Score: <span>0</span></div>
             <button id="menu-button" class="hidden">☰</button>
         </div>
         <div id="grid-container"></div>
@@ -259,18 +264,12 @@
         // --- DRAG & TOUCH INPUT LOGIC ---
         function addInputListenersToElement(el, data) {
             el.draggable = true;
-            el.addEventListener('dragstart', (e) => {
-                if (isProcessing || isPaused) { e.preventDefault(); return; }
-                draggedItem = { ...data, sourceContainer: el.parentElement };
-                el.classList.add('dragging'); setTimeout(() => el.style.visibility = 'hidden', 0);
-            });
+            el.addEventListener('dragstart', (e) => { if (isProcessing || isPaused) { e.preventDefault(); return; } draggedItem = { ...data, sourceContainer: el.parentElement }; el.classList.add('dragging'); setTimeout(() => el.style.visibility = 'hidden', 0); });
             el.addEventListener('dragend', () => { if(draggedItem) { draggedItem = null; el.classList.remove('dragging'); el.style.visibility = 'visible'; }});
             el.addEventListener('touchstart', (e) => {
-                if (isProcessing || isPaused) return;
-                e.preventDefault();
+                if (isProcessing || isPaused) return; e.preventDefault();
                 draggedItem = { ...data, sourceContainer: el.parentElement };
-                touchDragClone = el.cloneNode(true);
-                touchDragClone.classList.add('touch-drag-clone');
+                touchDragClone = el.cloneNode(true); touchDragClone.classList.add('touch-drag-clone');
                 document.body.appendChild(touchDragClone);
                 const touch = e.touches[0];
                 touchDragClone.style.left = `${touch.clientX - touchDragClone.offsetWidth / 2}px`;
@@ -305,22 +304,15 @@
         
         function addGridDropListeners() {
             gridContainer.addEventListener('dragover', (e) => e.preventDefault());
-            gridContainer.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const cell = e.target.closest('.grid-cell');
-                handleDrop(cell);
-            });
+            gridContainer.addEventListener('drop', (e) => { e.preventDefault(); const cell = e.target.closest('.grid-cell'); handleDrop(cell); });
         }
 
         function handleDrop(cell) {
             if (!cell || isProcessing || !draggedItem) return;
             const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
             const sourceContainer = draggedItem.sourceContainer;
-            if (draggedItem.type === 'heartstone') {
-                sourceContainer.innerHTML = ''; activateHeartstone(r, c);
-            } else if (grid[r][c] === null) {
-                sourceContainer.innerHTML = ''; placeFragment(r, c, draggedItem.fragment, draggedItem.groupInfo);
-            }
+            if (draggedItem.type === 'heartstone') { sourceContainer.innerHTML = ''; activateHeartstone(r, c); } 
+            else if (grid[r][c] === null) { sourceContainer.innerHTML = ''; placeFragment(r, c, draggedItem.fragment, draggedItem.groupInfo); }
         }
 
         function createFragmentElement(data) {
@@ -343,7 +335,7 @@
 
         // --- MATCH & EFFECT LOGIC ---
         function findAndProcessMatches(){return new Promise(e=>{const t=new Set,o=[];const l=(e,t,o)=>null!=e&&"fragment"===e.type&&e.group===t?.group&&e.group===o?.group;for(let n=0;n<CONFIG.GRID_SIZE;n++)for(let r=0;r<CONFIG.GRID_SIZE-2;r++)l(grid[n][r],grid[n][r+1],grid[n][r+2])&&(o.push({groupInfo:MEMORY_DATA[grid[n][r].group],cells:[[n,r],[n,r+1],[n,r+2]],orientation:"horizontal"}),t.add(`${n},${r}`),t.add(`${n},${r+1}`),t.add(`${n},${r+2}`));for(let n=0;n<CONFIG.GRID_SIZE;n++)for(let r=0;r<CONFIG.GRID_SIZE-2;r++)l(grid[r][n],grid[r+1][n],grid[r+2][n])&&(o.push({groupInfo:MEMORY_DATA[grid[r][n].group],cells:[[r,n],[r+1,n],[r+2,n]],orientation:"vertical"}),t.add(`${r},${n}`),t.add(`${r+1},${n}`),t.add(`${r+2},${n}`));if(0===o.length)return e(!1);updateScore(o.length*CONFIG.POINTS.MATCH),o.forEach(e=>{e.cells.forEach(([e,t])=>{getCellElement(e,t)?.firstChild?.classList.add("matched")}),applyEchoEffect(e.groupInfo,e.cells,e.orientation)}),setTimeout(()=>{t.forEach(t=>clearCell(...t.split(",").map(Number),!1)),e(!0)},500)})}
-        function applyEchoEffect(e,t,o){Sound.play("match");const l=document.createElement("div");l.className="memory-echo-overlay";const n=document.createElement("div");n.className="polaroid-frame";const r=document.createElement("div");r.className="polaroid-photo",r.textContent=grid[t[1][0]][t[1][1]].symbol,r.style.backgroundColor=e.color,n.appendChild(r),l.appendChild(n),document.body.appendChild(l),setTimeout(()=>l.remove(),1e3);const a=t[1],i=a[0],s=a[1],d=document.createElement("div");if(d.className=`echo-overlay ${e.group}`,"directional"===e.clear){d.classList.add(`directional-${"horizontal"===o?"row":"column"}`),"horizontal"===o?(d.style.top=`${i*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i,e)})()):(d.style.left=`${s*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s)})()),gridContainer.appendChild(d),setTimeout(()=>d.remove(),400)}else if("area_3x3"===e.clear){d.classList.add("area-3x3"),d.style.top=`${(i-1)*cellAndGapSize}px`,d.style.left=`${(s-1)*cellAndGapSize}px`,gridContainer.appendChild(d),setTimeout(()=>d.remove(),400);for(let e=i-1;e<=i+1;e++)for(let t=s-1;t<=s+1;t++)cleanseDementiaData(e,t)}else if("cross_clear"===e.clear){const t="horizontal"===o;for(let l=-1;l<=1;l++){const n=document.createElement("div");if(n.className=`echo-overlay ${e.group} directional-${t?"column":"row"}`,t){n.style.left=`${(s+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s+l)}else{n.style.top=`${(i+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i+l,e)}gridContainer.appendChild(n),setTimeout(()=>n.remove(),400)}}}
+        function applyEchoEffect(e,t,o){Sound.play("match");const l=document.createElement("div");l.className="memory-echo-overlay";const n=document.createElement("div");n.className="polaroid-frame";const r=document.createElement("div");r.className="polaroid-photo",r.textContent=grid[t[1][0]][t[1][1]]?.symbol||"",r.style.backgroundColor=e.color,n.appendChild(r),l.appendChild(n),document.body.appendChild(l),setTimeout(()=>l.remove(),1e3);const a=t[1],i=a[0],s=a[1],d=document.createElement("div");if(d.className=`echo-overlay ${e.group}`,"directional"===e.clear){d.classList.add(`directional-${"horizontal"===o?"row":"column"}`),"horizontal"===o?(d.style.top=`${i*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i,e)})()):(d.style.left=`${s*cellAndGapSize}px`,(()=>{for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s)})()),gridContainer.appendChild(d),setTimeout(()=>d.remove(),400)}else if("area_3x3"===e.clear){d.classList.add("area-3x3"),d.style.top=`${(i-1)*cellAndGapSize}px`,d.style.left=`${(s-1)*cellAndGapSize}px`,gridContainer.appendChild(d),setTimeout(()=>d.remove(),400);for(let e=i-1;e<=i+1;e++)for(let t=s-1;t<=s+1;t++)cleanseDementiaData(e,t)}else if("cross_clear"===e.clear){const t="horizontal"===o;for(let l=-1;l<=1;l++){const n=document.createElement("div");if(n.className=`echo-overlay ${e.group} directional-${t?"column":"row"}`,t){n.style.left=`${(s+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(e,s+l)}else{n.style.top=`${(i+l)*cellAndGapSize}px`;for(let e=0;e<CONFIG.GRID_SIZE;e++)cleanseDementiaData(i+l,e)}gridContainer.appendChild(n),setTimeout(()=>n.remove(),400)}}}
         function activateHeartstone(e,t){Sound.play("match"),updateScore(CONFIG.POINTS.HEARTSTONE_USE);const o=document.createElement("div");o.className="echo-overlay heartstone area-5x5";const l=Math.min(Math.max(0,e-2),CONFIG.GRID_SIZE-5),n=Math.min(Math.max(0,t-2),CONFIG.GRID_SIZE-5);o.style.top=`${l*cellAndGapSize}px`,o.style.left=`${n*cellAndGapSize}px`,gridContainer.appendChild(o),setTimeout(()=>o.remove(),400);for(let e=l;e<l+5;e++)for(let t=n;t<n+5;t++)e>=0&&e<CONFIG.GRID_SIZE&&t>=0&&t<CONFIG.GRID_SIZE&&clearCell(e,t,!0);processTurn()}
 
         // --- UI & UTILITY FUNCTIONS ---
