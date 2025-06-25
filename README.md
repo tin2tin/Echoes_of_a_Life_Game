@@ -11,6 +11,7 @@
   <a href="https://htmlpreview.github.io/?https://raw.githubusercontent.com/tin2tin/dementia_game/master/index.html">PLAY</a><br><br>
 </div>
 
+![Echo of a Life](https://github.com/user-attachments/assets/f164e181-21e9-4cda-9164-9a0c9bed53dd)
 
 ## The Concept: The Polaroid Projector
 
