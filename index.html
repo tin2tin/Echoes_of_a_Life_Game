@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of a Life</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --grid-size: 6; --cell-size: 10vmin; --grid-gap: 1vmin;
+            --color-bg-dark: #2c2c34; --color-text: #e0e0ff; --color-accent: #ffcda3;
+            --color-polaroid-frame: #f4f4f4;
+            /* NEW Desaturated Color Palette */
+            --color-pets: #c78a44;
+            --color-occasions: #5a9a93;
+            --color-relatives: #8c6b99;
+            --color-heartstone: #d17b7b;
+            /* NEW Visual Hierarchy Colors */
+            --color-grid-frame: #4a4a5a; /* Lightest */
+            --color-grid-cell-empty: #31313d; /* Light */
+            --color-dementia-light: #22222a; /* Mid */
+            --color-dementia-dark: #000;      /* Darkest */
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes fullMemoryFlash { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+        @keyframes levelUpFlash { 0% { transform: scale(1); } 50% { color: var(--color-accent); transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes sizzleOut { from { transform: scale(1); opacity: 1; } to { transform: scale(0.8); opacity: 0; } }
+        @keyframes echo-flash { from { opacity: 0.7; } to { opacity: 0; } }
+
+        /* --- GENERAL LAYOUT & AESTHETIC --- */
+        html { font-size: 1.5vmin; }
+        body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; user-select: none; }
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; position: relative; }
+        #ui-panel { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 1.5rem; font-weight: bold; text-shadow: 0 0 1vmin #000; }
+        #score-display span, #level-display span { color: var(--color-accent); font-weight: bold; }
+        #level-display.level-up { animation: levelUpFlash 0.5s ease-out; }
+
+        /* --- GRID & DEMENTIA STYLES (RE-IMAGINED) --- */
+        #grid-container { display: grid; grid-template-columns: repeat(var(--grid-size), var(--cell-size)); grid-template-rows: repeat(var(--grid-size), var(--cell-size)); gap: var(--grid-gap); background-color: var(--color-grid-frame); padding: var(--grid-gap); border-radius: 1vmin; position: relative; overflow: hidden; }
+        .grid-cell { width: var(--cell-size); height: var(--cell-size); background-color: var(--color-grid-cell-empty); box-shadow: inset 0.1vmin 0.1vmin 0.5vmin rgba(0,0,0,0.7); border-radius: 0.5vmin; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.3s ease; }
+        .dementia { background-color: var(--color-dementia-light); background-image: radial-gradient(var(--color-dementia-dark) 30%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
+        .dementia::after { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at 70% 80%, #5a2c3844, transparent 40%); clip-path: polygon(0 0, 100% 0, 100% 100%, 70% 100%, 30% 60%, 55% 40%, 20% 20%, 0 30%); animation: popIn 0.5s; }
+        .dementia.stubborn { background-color: var(--color-dementia-dark); background-image: none; }
+        .dementia.stubborn::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: radial-gradient(circle at 30% 20%, #881c2c55, transparent 40%); clip-path: polygon(100% 0, 0 100%, 0 70%, 25% 65%, 45% 30%, 80% 40%, 100% 20%); z-index: 2; animation: popIn 0.6s; }
+        .dementia.stubborn::after { background: radial-gradient(circle at 70% 80%, #881c2c88, transparent 50%); z-index: 1; }
+        .cleansing { animation: sizzleOut 0.4s ease-out forwards; }
+        
+        /* --- POLAROID FRAGMENT STYLES --- */
+        .polaroid-frame { width: 95%; height: 95%; background-color: #f4f4f4; border-radius: 0.5vmin; box-shadow: 0.2vmin 0.3vmin 0.5vmin rgba(0,0,0,0.4); padding: 0.8vmin 0.8vmin 2vmin 0.8vmin; display: flex; flex-direction: column; cursor: grab; animation: popIn 0.3s; }
+        .polaroid-frame.dragging { opacity: 0.5; cursor: grabbing; }
+        .polaroid-photo { flex-grow: 1; display: flex; justify-content: center; align-items: center; font-size: calc(var(--cell-size) * 0.5); filter: grayscale(50%) sepia(30%) brightness(0.9); }
+        .choices-wrapper { display: flex; justify-content: center; gap: 2vmin; margin-top: 1vmin; }
+        .choices-wrapper.choices-disabled { opacity: 0.5; cursor: wait; }
+        .choices-wrapper.choices-disabled .polaroid-frame { cursor: wait; }
+        .choice-container { width: var(--cell-size); height: calc(var(--cell-size) + 1.2vmin); display:flex; justify-content: center; align-items: center; border-radius: 0.5vmin; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ffffff1a 10px, #ffffff1a 20px); }
+
+        /* --- MEMORY ECHO OVERLAYS (UPDATED) --- */
+        .echo-overlay { position: absolute; pointer-events: none; z-index: 10; animation: echo-flash 0.4s ease-out forwards; border-radius: 0.5vmin; opacity: 0.7; }
+        .echo-overlay.pets { background-color: var(--color-pets); }
+        .echo-overlay.occasions { background-color: var(--color-occasions); }
+        .echo-overlay.relatives { background-color: var(--color-relatives); }
+        .echo-overlay.heartstone { background-color: var(--color-heartstone); }
+        .echo-overlay.directional-row { top: 0; left: 0; width: 100%; height: var(--cell-size); }
+        .echo-overlay.directional-column { top: 0; left: 0; width: var(--cell-size); height: 100%; }
+        .echo-overlay.area-3x3 { width: calc(3 * var(--cell-size) + 2 * var(--grid-gap)); height: calc(3 * var(--cell-size) + 2 * var(--grid-gap)); }
+        .echo-overlay.area-5x5 { width: calc(5 * var(--cell-size) + 4 * var(--grid-gap)); height: calc(5 * var(--cell-size) + 4 * var(--grid-gap)); }
+        .memory-echo-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; z-index: 20; pointer-events: none; animation: fullMemoryFlash 1s ease-out forwards; }
+        .memory-echo-overlay .polaroid-frame { width: 30vmin; height: 35vmin; padding: 1.5vmin 1.5vmin 4vmin 1.5vmin; cursor: default; }
+        .memory-echo-overlay .polaroid-photo { filter: none; font-size: 20vmin; }
+        
+        /* --- MESSAGE OVERLAYS --- */
+        #level-up-notification, .message-overlay { animation: fadeIn 0.5s; }
+        #level-up-notification { position: absolute; top: 20%; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: #000; padding: 1vmin 2vmin; border-radius: 1vmin; font-size: 1.2rem; font-weight: bold; z-index: 101; pointer-events: none; text-shadow: none; }
+        .message-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(44, 44, 52, 0.9); display: flex; justify-content: center; align-items: center; flex-direction: column; text-align: left; padding: 2vmin; z-index: 100; }
+        .message-overlay .message-content { background: var(--color-bg-dark, #2c2c34); padding: 2vmin 4vmin; border-radius: 1vmin; box-shadow: 0 0 2vmin rgba(0,0,0,0.5); }
+        .message-overlay h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--color-accent); text-align: center; font-style: italic; }
+        .message-overlay p, .message-overlay li { font-size: 1.1rem; line-height: 1.5; max-width: 60vmin; }
+        .message-overlay ul { list-style: none; padding-left: 1rem; }
+        .message-overlay button { padding: 1.5vmin 3vmin; font-size: 1.2rem; background-color: var(--color-accent); color: #000; border: none; border-radius: 0.5vmin; cursor: pointer; margin-top: 2vmin; font-weight: bold; transition: transform 0.2s ease; font-family: 'Lora', serif; font-style: italic; }
+        .message-overlay button:hover { transform: scale(1.05); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <audio id="background-music" loop src="audio/background_music.mp3"></audio>
+
+    <div id="game-container">
+        <div id="ui-panel">
+            <div id="score-display">Score: <span>0</span></div>
+            <div id="level-display">Level: <span>1</span></div>
+        </div>
+        <div id="grid-container"></div>
+        <div class="choices-wrapper">
+            <div class="choice-container"></div>
+            <div class="choice-container"></div>
+        </div>
+        <div id="level-up-notification" class="hidden"></div>
+    </div>
+    
+    <div id="start-screen" class="message-overlay">
+        <div class="message-content">
+            <h1>Echoes of a Life</h1>
+            <p>The mind is a projector, full of memories like slides in a tray. But <strong>Dementia</strong>, like a broken slide, threatens to darken the screen.</p>
+            <p>Piece together the faded fragments of your past. Restore them to clarity, and let their light push back the encroaching dark. As you delve deeper, you will unlock new memories:</p>
+            <ul>
+                <li><strong style="color:var(--color-pets)">Level 1 - Pets (🐶🐱🐰):</strong> Clears a single row or column.</li>
+                <li><strong style="color:var(--color-occasions)">Level 2 - Occasions (🎂🎄🏖️):</strong> Clears a 3x3 area.</li>
+                <li><strong style="color:var(--color-relatives)">Level 3 - Relatives (👨👩👧):</strong> Clears three rows OR three columns.</li>
+                <li><strong style="color:var(--color-heartstone)">Level 4+ - The Heartstone (❤️):</strong> A rare, lucid memory that clears a massive 5x5 area.</li>
+            </ul>
+            <center><button id="start-button">Begin Projecting</button></center>
+        </div>
+    </div>
+    
+    <div id="game-over-screen" class="message-overlay hidden">
+        <div class="message-content">
+            <h1>The Reel Ends</h1>
+            <p id="final-score" style="text-align:center; font-size: 1.5em;"></p>
+            <p>The dementia has clouded the lens for now. The projector grows quiet. But the images, the echoes of a life lived, are never truly gone. Rest, and let us remember again.</p>
+            <center><button id="restart-button">Rewind the Reel</button></center>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- SYNTHESIZED SOUND ENGINE ---
+        const Sound = (() => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            function play(type) {
+                if (!audioCtx || audioCtx.state === 'suspended') { audioCtx.resume(); }
+                if (!audioCtx) return;
+                try {
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    if (type === 'place') {
+                        oscillator.type = 'square'; oscillator.frequency.setValueAtTime(80, audioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                        const clickOsc = audioCtx.createOscillator(); const clickGain = audioCtx.createGain();
+                        clickOsc.connect(clickGain); clickGain.connect(audioCtx.destination);
+                        clickOsc.type = 'triangle'; clickOsc.frequency.setValueAtTime(2000, audioCtx.currentTime);
+                        clickGain.gain.setValueAtTime(0.05, audioCtx.currentTime); clickGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                        clickOsc.start(); clickOsc.stop(audioCtx.currentTime + 0.05);
+                    } else if (type === 'match') {
+                        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    }
+                    oscillator.start(); oscillator.stop(audioCtx.currentTime + 1);
+                } catch (e) { console.error("Sound playback failed:", e); }
+            }
+            return { play };
+        })();
+
+        // --- CONFIGURATION ---
+        const MEMORY_DATA = {
+            pets: { group: 'pets', color: 'var(--color-pets)', clear: 'directional', minLevel: 1, fragments: [{ symbol: '🐶' }, { symbol: '🐱' }, { symbol: '🐰' }] },
+            occasions: { group: 'occasions', color: 'var(--color-occasions)', clear: 'area_3x3', minLevel: 2, fragments: [{ symbol: '🎂' }, { symbol: '🎄' }, { symbol: '🏖️' }] },
+            relatives: { group: 'relatives', color: 'var(--color-relatives)', clear: 'cross_clear', minLevel: 3, fragments: [{ symbol: '👨' }, { symbol: '👩' }, { symbol: '👧' }] }
+        };
+        const CONFIG = {
+            GRID_SIZE: 6, BASE_SPAWN_INTERVAL: 4000, LEVEL_SCORE_THRESHOLD: 1000, HEARTSTONE_CHANCE: 0.05,
+            POINTS: { MATCH: 100, CLEAR_DEMENTIA: 20, CLEAR_STUBBORN: 30, HEARTSTONE_USE: 250 }
+        };
+
+        // --- GAME STATE ---
+        let grid, score, level, nextLevelScore, availableMemoryPool, isGameOver, isProcessing, draggedItem,
+            gameLoopId = null, lastTimestamp = 0, dementiaSpawnTimer = 0, cellAndGapSize = 0;
+        
+        // --- DOM REFERENCES ---
+        const bgMusic = document.getElementById('background-music'),
+              gridContainer = document.getElementById('grid-container'), scoreDisplay = document.querySelector('#score-display span'), levelDisplay = document.getElementById('level-display'),
+              choicesWrapper = document.querySelector('.choices-wrapper'), choiceContainers = document.querySelectorAll('.choice-container'),
+              levelUpNotification = document.getElementById('level-up-notification'), startScreen = document.getElementById('start-screen'), gameOverScreen = document.getElementById('game-over-screen'),
+              startButton = document.getElementById('start-button'), restartButton = document.getElementById('restart-button');
+
+        // --- MAIN GAME LOOP (Frame-rate independent) ---
+        function gameLoop(timestamp) {
+            if (isGameOver) return;
+            if (lastTimestamp === 0) lastTimestamp = timestamp;
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+            dementiaSpawnTimer -= deltaTime;
+            if (dementiaSpawnTimer <= 0) {
+                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 400), 1000);
+                dementiaSpawnTimer = spawnRate;
+                spawnDementia((level >= 4 && Math.random() < 0.25) ? 2 : 1);
+            }
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        // --- CORE GAME LOGIC ---
+        function init() {
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            score = 0; level = 1; nextLevelScore = CONFIG.LEVEL_SCORE_THRESHOLD;
+            isGameOver = false; isProcessing = false; draggedItem = null; availableMemoryPool = [];
+            lastTimestamp = 0; dementiaSpawnTimer = CONFIG.BASE_SPAWN_INTERVAL;
+            updateScore(0); updateLevelDisplay();
+            bgMusic.pause(); bgMusic.currentTime = 0;
+            gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden');
+            gridContainer.innerHTML = '';
+            grid = Array(CONFIG.GRID_SIZE).fill(null).map(() => Array(CONFIG.GRID_SIZE).fill(null));
+            for (let r = 0; r < CONFIG.GRID_SIZE; r++) {
+                for (let c = 0; c < CONFIG.GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell'; cell.dataset.r = r; cell.dataset.c = c;
+                    gridContainer.appendChild(cell);
+                }
+            }
+            choiceContainers.forEach(c => c.innerHTML = '');
+            calculateDynamicSizes(); addDragDropListeners();
+        }
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            if (Sound) Sound.play('match');
+            bgMusic.play().catch(e => console.error("Audio play failed:", e));
+            updateAvailableMemoryPool(); spawnDementia(3);
+            generateChoices();
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+        
+        async function processTurn() {
+            isProcessing = true; choicesWrapper.classList.add('choices-disabled');
+            await findAndProcessMatches();
+            setTimeout(() => {
+                generateChoices(); isProcessing = false; choicesWrapper.classList.remove('choices-disabled');
+                checkGameOver();
+            }, 500);
+        }
+
+        function calculateDynamicSizes() {
+            const cellEl = getCellElement(0, 0); if (!cellEl) return;
+            const style = window.getComputedStyle(cellEl);
+            const cellWidth = parseFloat(style.width);
+            const gridStyle = window.getComputedStyle(gridContainer);
+            const gap = parseFloat(gridStyle.gap);
+            cellAndGapSize = cellWidth + gap;
+        }
+        
+        // --- LEVELING & DIFFICULTY ---
+        function levelUp() {
+            level++; nextLevelScore += CONFIG.LEVEL_SCORE_THRESHOLD * level;
+            updateLevelDisplay(true);
+            const newlyUnlocked = updateAvailableMemoryPool();
+            if(newlyUnlocked) showLevelUpNotification(newlyUnlocked.group);
+        }
+        
+        function updateAvailableMemoryPool() {
+            const oldPoolSize = availableMemoryPool.length;
+            availableMemoryPool = Object.values(MEMORY_DATA).filter(group => level >= group.minLevel);
+            return availableMemoryPool.length > oldPoolSize ? availableMemoryPool[availableMemoryPool.length - 1] : null;
+        }
+
+        function spawnDementia(count = 1) {
+            if (isGameOver) return;
+            for (let i = 0; i < count; i++) {
+                const emptyCells = [];
+                for (let r = 0; r < CONFIG.GRID_SIZE; r++) for (let c = 0; c < CONFIG.GRID_SIZE; c++) if (grid[r][c] === null) emptyCells.push({ r, c });
+                if (emptyCells.length > 0) {
+                    const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    const isStubborn = level >= 2 && Math.random() < (level * 0.1);
+                    grid[r][c] = { type: 'dementia', stubborn: isStubborn };
+                    getCellElement(r, c).classList.add('dementia');
+                    if(isStubborn) getCellElement(r, c).classList.add('stubborn');
+                } else break;
+            }
+            checkGameOver();
+        }
+        
+        // --- DRAG & DROP & PLACEMENT LOGIC ---
+        function createFragmentElement(data) {
+            const frame = document.createElement('div'); frame.className = 'polaroid-frame';
+            const photo = document.createElement('div'); photo.className = 'polaroid-photo';
+            photo.textContent = data.symbol; photo.style.backgroundColor = data.color;
+            frame.appendChild(photo);
+            if(data.type === 'heartstone') photo.style.filter = 'none';
+            frame.draggable = true;
+            frame.addEventListener('dragstart', (e) => {
+                if (isProcessing) { e.preventDefault(); return; }
+                draggedItem = { ...data, sourceContainer: frame.parentElement };
+                frame.classList.add('dragging'); setTimeout(() => frame.style.visibility = 'hidden', 0);
+            });
+            frame.addEventListener('dragend', () => { draggedItem = null; frame.classList.remove('dragging'); frame.style.visibility = 'visible'; });
+            return frame;
+        }
+
+        function addDragDropListeners() {
+            gridContainer.addEventListener('dragover', (e) => e.preventDefault());
+            gridContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (isProcessing || !draggedItem) return;
+                const cell = e.target.closest('.grid-cell');
+                if (!cell) return;
+                const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+                const sourceContainer = draggedItem.sourceContainer;
+                if (draggedItem.type === 'heartstone') {
+                    sourceContainer.innerHTML = ''; activateHeartstone(r, c);
+                } else if (grid[r][c] === null) {
+                    sourceContainer.innerHTML = ''; placeFragment(r, c, draggedItem.fragment, draggedItem.groupInfo);
+                }
+            });
+        }
+        
+        function placeFragment(r, c, fragment, groupInfo) {
+            Sound.play('place');
+            grid[r][c] = { type: 'fragment', group: groupInfo.group, ...fragment };
+            const el = createFragmentElement({ symbol: fragment.symbol, color: groupInfo.color, type: 'fragment', fragment, groupInfo });
+            el.draggable = false;
+            getCellElement(r, c).appendChild(el);
+            processTurn();
+        }
+
+        // --- MATCH & EFFECT LOGIC ---
+        function findAndProcessMatches() {
+            return new Promise(resolve => {
+                const matches = new Set(), matchGroups = [];
+                const check = (t1, t2, t3) => t1?.type === 'fragment' && t1.group === t2?.group && t1.group === t3?.group;
+                for (let r = 0; r < CONFIG.GRID_SIZE; r++) for (let c = 0; c < CONFIG.GRID_SIZE - 2; c++) if (check(grid[r][c], grid[r][c+1], grid[r][c+2])) {
+                    matchGroups.push({ groupInfo: MEMORY_DATA[grid[r][c].group], cells: [[r,c],[r,c+1],[r,c+2]], orientation: 'horizontal' });
+                    matches.add(`${r},${c}`); matches.add(`${r},${c+1}`); matches.add(`${r},${c+2}`);
+                }
+                for (let c = 0; c < CONFIG.GRID_SIZE; c++) for (let r = 0; r < CONFIG.GRID_SIZE - 2; r++) if (check(grid[r][c], grid[r+1][c], grid[r+2][c])) {
+                    matchGroups.push({ groupInfo: MEMORY_DATA[grid[r][c].group], cells: [[r,c],[r+1,c],[r+2,c]], orientation: 'vertical' });
+                    matches.add(`${r},${c}`); matches.add(`${r+1},${c}`); matches.add(`${r+2},${c}`);
+                }
+                if (matchGroups.length === 0) { resolve(false); return; }
+                updateScore(matchGroups.length * CONFIG.POINTS.MATCH);
+                matchGroups.forEach(g => {
+                    g.cells.forEach(([r_idx,c_idx]) => getCellElement(r_idx, c_idx)?.firstChild?.classList.add('matched'));
+                    applyEchoEffect(g.groupInfo, g.cells, g.orientation);
+                });
+                setTimeout(() => {
+                    matches.forEach(coord => clearCell(...coord.split(',').map(Number), false));
+                    resolve(true);
+                }, 500);
+            });
+        }
+        
+        function applyEchoEffect(groupInfo, matchCells, orientation) {
+            Sound.play('match');
+            const echoOverlay = document.createElement('div');
+            echoOverlay.className = 'memory-echo-overlay';
+            const frame = document.createElement('div'); frame.className = 'polaroid-frame';
+            const photo = document.createElement('div'); photo.className = 'polaroid-photo';
+            photo.textContent = grid[matchCells[1][0]][matchCells[1][1]].symbol;
+            photo.style.backgroundColor = groupInfo.color;
+            frame.appendChild(photo); echoOverlay.appendChild(frame);
+            gridContainer.appendChild(echoOverlay); setTimeout(() => echoOverlay.remove(), 1000);
+
+            const [cr, cc] = matchCells[1];
+            const effectEl = document.createElement('div');
+            effectEl.className = `echo-overlay ${groupInfo.group}`;
+            
+            if (groupInfo.clear === 'directional') {
+                effectEl.classList.add(`directional-${orientation === 'horizontal' ? 'row' : 'column'}`);
+                if (orientation === 'horizontal') {
+                    effectEl.style.top = `${cr * cellAndGapSize}px`;
+                    for (let c_idx = 0; c_idx < CONFIG.GRID_SIZE; c_idx++) cleanseDementiaData(cr, c_idx);
+                } else {
+                    effectEl.style.left = `${cc * cellAndGapSize}px`;
+                    for (let r_idx = 0; r_idx < CONFIG.GRID_SIZE; r_idx++) cleanseDementiaData(r_idx, cc);
+                }
+                gridContainer.appendChild(effectEl); setTimeout(() => effectEl.remove(), 400);
+            } else if (groupInfo.clear === 'area_3x3') {
+                effectEl.classList.add('area-3x3');
+                effectEl.style.top = `${(cr - 1) * cellAndGapSize}px`; effectEl.style.left = `${(cc - 1) * cellAndGapSize}px`;
+                gridContainer.appendChild(effectEl); setTimeout(() => effectEl.remove(), 400);
+                for (let r_idx = cr - 1; r_idx <= cr + 1; r_idx++) for (let c_idx = cc - 1; c_idx <= cc + 1; c_idx++) {
+                    cleanseDementiaData(r_idx, c_idx);
+                }
+            } else if (groupInfo.clear === 'cross_clear') {
+                const isHorizontal = orientation === 'horizontal';
+                for (let offset = -1; offset <= 1; offset++) {
+                    const crossEffectEl = document.createElement('div');
+                    crossEffectEl.className = `echo-overlay ${groupInfo.group} directional-${isHorizontal ? 'column' : 'row'}`;
+                    if (isHorizontal) {
+                        crossEffectEl.style.left = `${(cc + offset) * cellAndGapSize}px`;
+                        for (let r = 0; r < CONFIG.GRID_SIZE; r++) cleanseDementiaData(r, cc + offset);
+                    } else {
+                        crossEffectEl.style.top = `${(cr + offset) * cellAndGapSize}px`;
+                        for (let c = 0; c < CONFIG.GRID_SIZE; c++) cleanseDementiaData(cr + offset, c);
+                    }
+                    gridContainer.appendChild(crossEffectEl); setTimeout(() => crossEffectEl.remove(), 400);
+                }
+            }
+        }
+        
+        function activateHeartstone(r_drop, c_drop) {
+            Sound.play('match'); updateScore(CONFIG.POINTS.HEARTSTONE_USE);
+            const effectEl = document.createElement('div');
+            effectEl.className = 'echo-overlay heartstone area-5x5';
+            const startR = Math.min(Math.max(0, r_drop - 2), CONFIG.GRID_SIZE - 5);
+            const startC = Math.min(Math.max(0, c_drop - 2), CONFIG.GRID_SIZE - 5);
+            effectEl.style.top = `${startR * cellAndGapSize}px`; effectEl.style.left = `${startC * cellAndGapSize}px`;
+            gridContainer.appendChild(effectEl); setTimeout(() => effectEl.remove(), 400);
+            
+            for (let r = startR; r < startR + 5; r++) for (let c = startC; c < startC + 5; c++) {
+                if (r >= 0 && r < CONFIG.GRID_SIZE && c >= 0 && c < CONFIG.GRID_SIZE) {
+                    clearCell(r, c, true);
+                }
+            }
+            processTurn();
+        }
+
+        // --- UI & UTILITY FUNCTIONS ---
+        function clearCell(r, c, isHeartstone) {
+            const cellEl = getCellElement(r, c);
+            const cellData = grid[r][c];
+            if (cellEl && cellData) {
+                if (isHeartstone && cellData.type === 'dementia') {
+                     updateScore(cellData.stubborn ? CONFIG.POINTS.CLEAR_STUBBORN + CONFIG.POINTS.CLEAR_DEMENTIA : CONFIG.POINTS.CLEAR_DEMENTIA);
+                }
+                cellEl.innerHTML = '';
+                cellEl.classList.remove('dementia', 'stubborn');
+                grid[r][c] = null;
+            }
+        }
+
+        function cleanseDementiaData(r, c) {
+            if (r < 0 || r >= CONFIG.GRID_SIZE || c < 0 || c >= CONFIG.GRID_SIZE) return;
+            const cellData = grid[r][c];
+            if (cellData?.type === 'dementia') {
+                const cellEl = getCellElement(r, c);
+                cellEl.classList.add('cleansing');
+                setTimeout(() => {
+                    const currentCellData = grid[r][c];
+                    if (currentCellData && currentCellData.type === 'dementia') {
+                        if (currentCellData.stubborn) {
+                            currentCellData.stubborn = false;
+                            cellEl.classList.remove('stubborn', 'cleansing');
+                            updateScore(CONFIG.POINTS.CLEAR_STUBBORN);
+                        } else {
+                            grid[r][c] = null;
+                            cellEl.classList.remove('dementia', 'cleansing');
+                            updateScore(CONFIG.POINTS.CLEAR_DEMENTIA);
+                        }
+                    } else { cellEl.classList.remove('dementia', 'stubborn', 'cleansing'); }
+                }, 400);
+            }
+        }
+
+        function generateChoices() {
+            choiceContainers.forEach(container => {
+                if (container.hasChildNodes()) return;
+                if (level >= 4 && Math.random() < CONFIG.HEARTSTONE_CHANCE) {
+                    container.appendChild(createFragmentElement({ symbol: '❤️', color: 'var(--color-heartstone)', type: 'heartstone' }));
+                    return;
+                }
+                const weightedPool = [];
+                availableMemoryPool.forEach(group => {
+                    const weight = group.group === 'relatives' ? 1 : (group.group === 'occasions' ? 2 : 4);
+                    for(let i=0; i<weight; i++) weightedPool.push(group);
+                });
+                const randomGroup = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+                const randomFragment = randomGroup.fragments[Math.floor(Math.random() * randomGroup.fragments.length)];
+                container.appendChild(createFragmentElement({ symbol: randomFragment.symbol, color: randomGroup.color, type: 'fragment', fragment: randomFragment, groupInfo: randomGroup }));
+            });
+        }
+        
+        function getCellElement(r, c) { return gridContainer.querySelector(`[data-r='${r}'][data-c='${c}']`); }
+        function updateScore(amount) { if(isGameOver) return; score += amount; scoreDisplay.textContent = score; if (score >= nextLevelScore) levelUp(); }
+        function updateLevelDisplay(isLevelUp = false) { levelDisplay.querySelector('span').textContent = level; if (isLevelUp) { levelDisplay.classList.add('level-up'); setTimeout(() => levelDisplay.classList.remove('level-up'), 500); } }
+        
+        function showLevelUpNotification(unlockedGroupName) {
+            levelUpNotification.textContent = `You remember your ${unlockedGroupName}...`;
+            levelUpNotification.classList.remove('hidden');
+            levelUpNotification.style.animation = 'fadeIn 0.5s ease-out forwards';
+            setTimeout(() => {
+                levelUpNotification.style.animation = 'fadeOut 0.5s ease-in forwards';
+                setTimeout(() => levelUpNotification.classList.add('hidden'), 500);
+            }, 2500);
+        }
+
+        function checkGameOver() {
+            if(isGameOver) return;
+            for (let r = 0; r < CONFIG.GRID_SIZE; r++) for (let c = 0; c < CONFIG.GRID_SIZE; c++) if (grid[r][c] === null) return;
+            isGameOver = true;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            bgMusic.pause();
+            document.getElementById('final-score').textContent = `Final Score: ${score} | Reached Level: ${level}`;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', () => { init(); startGame(); });
+        window.addEventListener('resize', calculateDynamicSizes);
+        init();
+    });
+    </script>
+</body>
+</html>
