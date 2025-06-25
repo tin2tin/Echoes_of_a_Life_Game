@@ -9,19 +9,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cell-size: 12.5vmin; --grid-gap: 1.5vmin;
+            --cell-size: 11vmin; --grid-gap: 1.2vmin;
             @media (min-width: 768px) { --cell-size: 10vmin; --grid-gap: 1vmin; }
 
             --color-bg-dark: #2c2c34; --color-text: #e0e0ff; --color-accent: #ffcda3;
             --color-polaroid-frame: #f4f4f4;
-            --color-pets: #d39c5f; 
-            --color-occasions: #5aab9f;
-            --color-relatives: #a37fb1;
-            --color-heartstone: #d17b7b;
-            --color-grid-frame: #4a4a5a; 
-            --color-grid-cell-empty: #31313d; 
-            --color-dementia-light: #22222a;
-            --color-dementia-dark: #000;
+            --color-pets: #d39c5f; --color-occasions: #5aab9f; --color-relatives: #a37fb1; --color-heartstone: #d17b7b;
+            
+            /* NEW 4-LAYER VISUAL HIERARCHY */
+            --color-grid-frame: #555a66;        /* Lightest */
+            --color-grid-cell-empty: #404552;   /* Light */
+            --color-dementia-light: #1e1e24;   /* Mid */
+            --color-dementia-dark: #000;         /* Darkest */
         }
 
         /* --- ANIMATIONS --- */
@@ -38,9 +37,8 @@
         html { font-size: 1.5vmin; @media (min-width: 768px) { font-size: 1.2vmin; } }
         body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; }
         #body-wrapper { display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; box-sizing: border-box; }
-        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin 0; background-color: rgba(0,0,0,0.2); animation: fadeIn 1s; width: 100%; height: 100%; box-sizing: border-box; justify-content: center; }
-        @media (min-width: 768px) { #game-container { width: auto; height: auto; max-width: 800px; max-height: 900px; padding: 2.5vmin; border-radius: 1.5vmin; } }
-        #ui-panel { width: 100%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
+        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin 0; background-color: rgba(0,0,0,0.2); animation: fadeIn 1s; width: 100%; height: 100%; box-sizing: border-box; justify-content: center; @media (min-width: 768px) { width: auto; height: auto; max-width: 800px; max-height: 900px; padding: 2.5vmin; border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); } }
+        #ui-panel { width: 100%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
         #score-display { text-align: center; }
         #level-display { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
         #menu-button { position: absolute; top: 50%; right: 0; transform: translateY(-50%); font-size: 3rem; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }
@@ -50,9 +48,9 @@
         /* --- GRID & DEMENTIA STYLES --- */
         #grid-container { display: grid; grid-template-columns: repeat(6, var(--cell-size)); grid-template-rows: repeat(6, var(--cell-size)); gap: var(--grid-gap); background-color: var(--color-grid-frame); padding: var(--grid-gap); border-radius: 1vmin; position: relative; overflow: hidden; }
         .grid-cell { width: var(--cell-size); height: var(--cell-size); background-color: var(--color-grid-cell-empty); box-shadow: inset 0.1vmin 0.1vmin 0.5vmin rgba(0,0,0,0.7); border-radius: 0.5vmin; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.3s ease; }
-        .dementia { background-color: var(--color-dementia-light); background-image: radial-gradient(var(--color-dementia) 30%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
+        .dementia { background-color: var(--color-dementia-light); box-shadow: none; animation: fadeIn 0.5s; }
         .dementia::before { content: ''; position: absolute; width: 30%; height: 30%; top: 35%; left: 35%; background: radial-gradient(circle, #ff475766, transparent 70%); border-radius: 50%; animation: ember-glow 3s infinite ease-in-out; }
-        .dementia.stubborn { background-color: var(--color-dementia); background-image: none; }
+        .dementia.stubborn { background-color: var(--color-dementia-dark); }
         .dementia.stubborn::before { width: 50%; height: 50%; top: 25%; left: 25%; background: radial-gradient(circle, #ff4757aa, transparent 70%); animation-duration: 2s; }
         .cleansing { animation: sizzleOut 0.4s ease-out forwards; }
         
@@ -96,6 +94,7 @@
 </head>
 <body>
     <audio id="background-music" loop src="audio/background_music.mp3"></audio>
+
     <div id="body-wrapper">
         <div id="game-container">
             <div id="ui-panel">
@@ -206,7 +205,7 @@
             lastTimestamp = timestamp;
             dementiaSpawnTimer -= deltaTime;
             if (dementiaSpawnTimer <= 0) {
-                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 300), 1200);
+                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 300), 1200); // Re-balanced spawn rate
                 dementiaSpawnTimer = spawnRate;
                 spawnDementia((level >= 4 && Math.random() < 0.25) ? 2 : 1);
             }
