@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cell-size: 11vmin; --grid-gap: 1.2vmin;
-            @media (min-width: 768px) { --cell-size: 10vmin; --grid-gap: 1vmin; }
+            --cell-size: 13.5vw; 
+            --grid-gap: 1.5vw;
+            @media (min-width: 768px) { 
+                --cell-size: 10vmin; 
+                --grid-gap: 1vmin; 
+            }
 
             --color-bg-dark: #2c2c34; --color-text: #e0e0ff; --color-accent: #ffcda3;
             --color-polaroid-frame: #f4f4f4;
-            /* NEW Desaturated & Distinct Color Palette */
-            --color-pets: #d39c5f;
-            --color-occasions: #5aab9f;
-            --color-relatives: #a37fb1;
-            --color-heartstone: #d17b7b;
+            --color-pets: #d39c5f; --color-occasions: #5aab9f; --color-relatives: #a37fb1; --color-heartstone: #d17b7b;
             --color-grid-frame: #4a4a5a; --color-grid-cell-empty: #31313d; --color-dementia: #000;
         }
 
@@ -33,12 +33,28 @@
         @keyframes ember-glow { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
 
         /* --- GENERAL LAYOUT & AESTHETIC --- */
-        html { font-size: 1.5vmin; @media (min-width: 768px) { font-size: 1.2vmin; } }
-        body { font-family: 'Lora', serif; background-color: var(--color-bg-dark); background-image: radial-gradient(circle at 10% 20%, #ffcda333, transparent 50%); color: var(--color-text); display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; margin: 0; overflow: hidden; user-select: none; -webkit-user-select: none; box-sizing: border-box; }
-        #game-container { display: flex; flex-direction: column; align-items: center; gap: 2vmin; padding: 2.5vmin; background-color: rgba(0,0,0,0.2); border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); animation: fadeIn 1s; width: 98vw; height: 98vh; max-width: 800px; max-height: 900px; box-sizing: border-box; justify-content: center; }
-        #ui-panel { width: 100%; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; text-shadow: 0 0 1vmin #000; padding: 0 1rem; box-sizing: border-box; position: relative; }
+        html, body {
+            width: 100%; height: 100%; margin: 0; overflow: hidden;
+            font-family: 'Lora', serif; background-color: var(--color-bg-dark); color: var(--color-text);
+            display: flex; justify-content: center; align-items: center;
+            user-select: none; -webkit-user-select: none; box-sizing: border-box;
+        }
+        #game-container { 
+            display: flex; flex-direction: column; align-items: center; gap: 2vmin;
+            padding: 2.5vmin; background-color: rgba(0,0,0,0.2); 
+            border-radius: 1.5vmin; box-shadow: 0 1vmin 3vmin rgba(0,0,0,0.5); 
+            animation: fadeIn 1s;
+            width: 100%; height: 100%;
+            box-sizing: border-box; justify-content: center; 
+        }
+        @media (min-width: 768px) {
+            #game-container { max-width: 800px; max-height: 900px; }
+        }
+
+        /* --- UI PANEL --- */
+        #ui-panel { width: 100%; display: flex; justify-content: center; align-items: center; font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: bold; text-shadow: 0 0 1vmin #000; box-sizing: border-box; position: relative; }
         #score-display { text-align: center; }
-        #level-display { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); }
+        #level-display { position: absolute; left: 0; top: 50%; transform: translateY(-50%); }
         #menu-button { position: absolute; top: 50%; right: 0; transform: translateY(-50%); font-size: 3rem; background: none; border: none; color: var(--color-accent); cursor: pointer; z-index: 50; padding: 0.5rem; opacity: 0.7; transition: opacity 0.2s; }
         #score-display span, #level-display span { color: var(--color-accent); font-weight: bold; }
         #level-display.level-up { animation: levelUpFlash 0.5s ease-out; }
@@ -46,7 +62,7 @@
         /* --- GRID & DEMENTIA STYLES --- */
         #grid-container { display: grid; grid-template-columns: repeat(6, var(--cell-size)); grid-template-rows: repeat(6, var(--cell-size)); gap: var(--grid-gap); background-color: var(--color-grid-frame); padding: var(--grid-gap); border-radius: 1vmin; position: relative; overflow: hidden; }
         .grid-cell { width: var(--cell-size); height: var(--cell-size); background-color: var(--color-grid-cell-empty); box-shadow: inset 0.1vmin 0.1vmin 0.5vmin rgba(0,0,0,0.7); border-radius: 0.5vmin; display: flex; justify-content: center; align-items: center; position: relative; transition: background-color 0.3s ease; }
-        .dementia { background-color: #22222a; background-image: radial-gradient(#111 40%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
+        .dementia { background-color: #22222a; background-image: radial-gradient(var(--color-dementia) 30%, transparent 70%); box-shadow: none; animation: fadeIn 0.5s; }
         .dementia::before { content: ''; position: absolute; width: 30%; height: 30%; top: 35%; left: 35%; background: radial-gradient(circle, #ff475766, transparent 70%); border-radius: 50%; animation: ember-glow 3s infinite ease-in-out; }
         .dementia.stubborn { background-color: var(--color-dementia); background-image: none; }
         .dementia.stubborn::before { width: 50%; height: 50%; top: 25%; left: 25%; background: radial-gradient(circle, #ff4757aa, transparent 70%); animation-duration: 2s; }
@@ -60,7 +76,7 @@
         .choices-wrapper.choices-disabled { opacity: 0.5; cursor: wait; }
         .choices-wrapper.choices-disabled .polaroid-frame { cursor: wait; }
         .choice-container { width: var(--cell-size); height: calc(var(--cell-size) + 1.2vmin); display:flex; justify-content: center; align-items: center; border-radius: 0.5vmin; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ffffff1a 10px, #ffffff1a 20px); }
-        .touch-drag-clone { position: fixed; z-index: 1000; pointer-events: none; opacity: 0.7; background-color: transparent !important; width: var(--cell-size); height: var(--cell-size); }
+        .touch-drag-clone { position: fixed; z-index: 1000; pointer-events: none; opacity: 0.7; background-color: transparent !important; width: var(--cell-size); height: calc(var(--cell-size) + 1.2vmin); }
         
         /* --- MEMORY ECHO OVERLAYS --- */
         .echo-overlay { position: absolute; pointer-events: none; z-index: 10; animation: echo-flash 0.4s ease-out forwards; border-radius: 0.5vmin; opacity: 0.7; }
@@ -203,7 +219,7 @@
             lastTimestamp = timestamp;
             dementiaSpawnTimer -= deltaTime;
             if (dementiaSpawnTimer <= 0) {
-                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 300), 1200); // Re-balanced spawn rate
+                const spawnRate = Math.max(CONFIG.BASE_SPAWN_INTERVAL - (level * 300), 1200);
                 dementiaSpawnTimer = spawnRate;
                 spawnDementia((level >= 4 && Math.random() < 0.25) ? 2 : 1);
             }
@@ -229,9 +245,7 @@
                 }
             }
             choiceContainers.forEach(c => c.innerHTML = '');
-            calculateDynamicSizes();
-            addGlobalTouchListeners();
-            addGridDropListeners();
+            calculateDynamicSizes(); addInputListeners();
         }
 
         function startGame() {
@@ -265,15 +279,14 @@
         function levelUp(){level++;nextLevelScore+=CONFIG.LEVEL_SCORE_THRESHOLD*level;updateLevelDisplay(!0);const e=updateAvailableMemoryPool();e&&showLevelUpNotification(e.group)}function updateAvailableMemoryPool(){const e=availableMemoryPool.length;return availableMemoryPool=Object.values(MEMORY_DATA).filter(e=>level>=e.minLevel),availableMemoryPool.length>e?availableMemoryPool[availableMemoryPool.length-1]:null}function spawnDementia(e=1){if(!isGameOver)for(let t=0;t<e;t++){const e=[];for(let t=0;t<CONFIG.GRID_SIZE;t++)for(let o=0;o<CONFIG.GRID_SIZE;o++)null===grid[t][o]&&e.push({r:t,c:o});if(e.length>0){const{r:t,c:o}=e[Math.floor(Math.random()*e.length)],l=level>=2&&Math.random()<level*.15;grid[t][o]={type:"dementia",stubborn:l},getCellElement(t,o).classList.add("dementia"),l&&getCellElement(t,o).classList.add("stubborn")}else break}checkGameOver()}
         
         // --- DRAG & TOUCH INPUT LOGIC ---
-        function addInputListenersToElement(el, data) {
+        function addInputListeners(el, data) {
             el.draggable = true;
             el.addEventListener('dragstart', (e) => { if (isProcessing || isPaused) { e.preventDefault(); return; } draggedItem = { ...data, sourceContainer: el.parentElement }; el.classList.add('dragging'); setTimeout(() => el.style.visibility = 'hidden', 0); });
             el.addEventListener('dragend', () => { if(draggedItem) { draggedItem = null; el.classList.remove('dragging'); el.style.visibility = 'visible'; }});
             el.addEventListener('touchstart', (e) => {
                 if (isProcessing || isPaused) return; e.preventDefault();
                 draggedItem = { ...data, sourceContainer: el.parentElement };
-                touchDragClone = el.cloneNode(true);
-                touchDragClone.classList.add('touch-drag-clone');
+                touchDragClone = el.cloneNode(true); touchDragClone.classList.add('touch-drag-clone');
                 document.body.appendChild(touchDragClone);
                 const touch = e.touches[0];
                 touchDragClone.style.left = `${touch.clientX - touchDragClone.offsetWidth / 2}px`;
@@ -325,7 +338,7 @@
             photo.textContent = data.symbol; photo.style.backgroundColor = data.color;
             frame.appendChild(photo);
             if(data.type === 'heartstone') photo.style.filter = 'none';
-            addInputListenersToElement(frame, data);
+            addInputListeners(frame, data);
             return frame;
         }
 
